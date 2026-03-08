@@ -227,32 +227,32 @@ These example images are not the final dataset. They are visual anchors for the 
 
 | Example | File | What it demonstrates |
 | --- | --- | --- |
-| Clean single-series line | `../../docs/assets/chart_extraction/line_clean.png` | Base case for point extraction |
-| Single-series bar with long labels | `../../docs/assets/chart_extraction/bar_long_labels.png` | Categorical labels and longer text |
-| Multi-series line with legend | `../../docs/assets/chart_extraction/multiline_legend.png` | A near-term extension after v1 |
-| Grouped bar with labels above bars | `../../docs/assets/chart_extraction/grouped_bar_labels.png` | A longer-horizon cluttered variant |
+| Clean single-series line | `docs/assets/chart_extraction/line_clean.png` | Base case for point extraction |
+| Single-series bar with long labels | `docs/assets/chart_extraction/bar_long_labels.png` | Categorical labels and longer text |
+| Multi-series line with legend | `docs/assets/chart_extraction/multiline_legend.png` | A near-term extension after v1 |
+| Grouped bar with labels above bars | `docs/assets/chart_extraction/grouped_bar_labels.png` | A longer-horizon cluttered variant |
 
 ### Clean Single-Series Line
 
-![Clean single-series line](../../docs/assets/chart_extraction/line_clean.png)
+![Clean single-series line](docs/assets/chart_extraction/line_clean.png)
 
 This is the easiest near-term chart family. It is a good fit for the first reward loop because the underlying points are ordered and visually separated.
 
 ### Single-Series Bar with Long Labels
 
-![Single-series bar with long labels](../../docs/assets/chart_extraction/bar_long_labels.png)
+![Single-series bar with long labels](docs/assets/chart_extraction/bar_long_labels.png)
 
 This stays within the near-term scope but introduces one important difficulty axis: label length.
 
 ### Multi-Series Line with Legend
 
-![Multi-series line with legend](../../docs/assets/chart_extraction/multiline_legend.png)
+![Multi-series line with legend](docs/assets/chart_extraction/multiline_legend.png)
 
 This should be added after the single-series setup is stable. It introduces series naming, legend usage, and multiple traces.
 
 ### Grouped Bar with Labels Above Bars
 
-![Grouped bar with labels above bars](../../docs/assets/chart_extraction/grouped_bar_labels.png)
+![Grouped bar with labels above bars](docs/assets/chart_extraction/grouped_bar_labels.png)
 
 This is useful as a later target because it adds grouped structure, multiple series, and annotation clutter.
 
