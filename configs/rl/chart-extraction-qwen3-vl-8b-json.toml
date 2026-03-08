@@ -1,0 +1,21 @@
+model = "Qwen/Qwen3-VL-8B-Instruct"
+max_steps = 60
+batch_size = 512
+rollouts_per_example = 16
+
+[sampling]
+max_tokens = 512
+
+[[env]]
+id = "13point5/chart-extraction"
+args = { output_mode = "json", dataset_repo_id = "13point5/chart-extraction-synth-v1" }
+
+[wandb]
+entity = "13point5-labs"
+project = "chart-extraction"
+name = "qwen3-vl-8b-json-v1"
+
+[val]
+interval = 10
+num_examples = 32
+rollouts_per_example = 1

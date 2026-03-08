@@ -146,6 +146,13 @@ key = "PRIME_API_KEY"
 type = "openai_chat_completions"
 
 [[endpoint]]
+endpoint_id = "qwen3-vl-8b-i"
+model = "qwen/qwen3-vl-8b-instruct"
+url = "https://api.pinference.ai/api/v1"
+key = "PRIME_API_KEY"
+type = "openai_chat_completions"
+
+[[endpoint]]
 endpoint_id = "qwen3-vl-30b-t"
 model = "qwen/qwen3-vl-30b-a3b-thinking"
 url = "https://api.pinference.ai/api/v1"

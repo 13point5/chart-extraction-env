@@ -25,3 +25,6 @@
 
 - 2026-03-08 18:31:15 EDT: current generator is intentionally limited to single-series charts
 - 2026-03-08 18:37:00 EDT: series names were fixed to `series_1` for v1 so the target never depends on invisible legend text
+- 2026-03-08 19:01:30 EDT: generated a larger corrected dataset at `environments/chart_extraction/outputs/chart_extraction/dataset_v1_series1`
+- 2026-03-08 19:01:30 EDT: pushed the corrected dataset to Hugging Face as `13point5/chart-extraction-synth-v1`
+- 2026-03-08 19:02:10 EDT: verified the pushed dataset from both local disk and the Hub; all single-series targets now consistently use `series_1`
