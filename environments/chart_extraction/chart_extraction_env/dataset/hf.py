@@ -3,10 +3,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from datasets import Dataset, DatasetDict, Features, Image, Value
+from datasets import Dataset, DatasetDict, Features, Image, Value, load_dataset, load_from_disk
 from huggingface_hub import HfApi
 
-from .generator import canonical_answer_json, canonical_info_json
+from .generator import build_split_examples, canonical_answer_json, canonical_info_json
 from .models import GeneratedExample
 
 DATASET_FEATURES = Features(
@@ -39,6 +39,27 @@ def example_to_row(example: GeneratedExample) -> dict[str, object]:
 def save_dataset_dict(dataset_dict: DatasetDict, output_dir: Path) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     dataset_dict.save_to_disk(str(output_dir))
+
+
+def load_chart_dataset(
+    *,
+    split: str,
+    local_path: str | None = None,
+    repo_id: str | None = None,
+    seed: int = 7,
+    default_examples: int = 64,
+) -> Dataset:
+    if local_path:
+        loaded = load_from_disk(local_path)
+        if isinstance(loaded, DatasetDict):
+            return loaded[split]
+        return loaded
+
+    if repo_id:
+        return load_dataset(repo_id, split=split)
+
+    examples = build_split_examples(split=split, num_examples=default_examples, seed=seed)
+    return Dataset.from_list([example_to_row(example) for example in examples], features=DATASET_FEATURES)
 
 
 def push_dataset_dict(

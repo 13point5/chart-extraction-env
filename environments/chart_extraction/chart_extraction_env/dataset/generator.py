@@ -27,7 +27,6 @@ from .sampling import (
     sample_category_labels,
     sample_chart_spec,
     sample_color,
-    sample_series_name,
     sample_title,
     sample_y_axis_label,
 )
@@ -76,7 +75,7 @@ def build_recipe(seed: int, example_index: int) -> ChartRecipe:
     rng = random.Random(seed)
     spec = sample_chart_spec(rng, example_index)
     render_plan = build_render_plan(spec=spec, rng=rng)
-    series_name = sample_series_name(rng, spec.label_profile)
+    series_name = "series_1"
     answer = build_answer(spec=spec, rng=rng, series_name=series_name)
     return ChartRecipe(
         spec=spec,

@@ -15,6 +15,11 @@ class XType(str, Enum):
     CATEGORICAL = "categorical"
 
 
+class OutputMode(str, Enum):
+    JSON = "json"
+    MARKDOWN = "markdown"
+
+
 class DataProfile(str, Enum):
     MONO_UP = "mono_up"
     MONO_DOWN = "mono_down"
