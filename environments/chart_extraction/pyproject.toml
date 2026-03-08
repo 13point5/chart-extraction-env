@@ -1,11 +1,16 @@
 [project]
 name = "chart-extraction"
-description = "Your environment description here"
-tags = ["placeholder-tag", "train", "eval"]
+description = "Synthetic chart extraction environment for Prime Lab and Verifiers"
+tags = ["vision", "chart-extraction", "train", "eval"]
 version = "0.1.0"
 requires-python = ">=3.10"
 dependencies = [
     "verifiers>=0.1.10",
+    "datasets>=3.2.0",
+    "matplotlib>=3.9.0",
+    "numpy>=2.1.0",
+    "pillow>=11.0.0",
+    "pydantic>=2.10.0",
 ]
 
 [build-system]
@@ -13,7 +18,11 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
-include = ["chart_extraction.py", "pyproject.toml"] 
+include = [
+    "chart_extraction.py",
+    "chart_extraction_env/**/*.py",
+    "pyproject.toml",
+]
 
 [tool.verifiers.eval]
 num_examples = 5
