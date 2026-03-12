@@ -4,7 +4,7 @@ from datasets import Dataset
 import verifiers as vf
 
 from chart_extraction_env.dataset.hf import load_chart_dataset
-from chart_extraction_env.dataset.models import CanonicalAnswer, OutputMode, XType
+from chart_extraction_env.dataset.models import CanonicalAnswer, DatasetVariant, OutputMode, XType
 from chart_extraction_env.parsing import (
     extract_assistant_text,
     normalized_label,
@@ -19,6 +19,7 @@ def load_environment(
     split: str = "train",
     eval_split: str | None = None,
     output_mode: str = OutputMode.JSON.value,
+    dataset_variant: str = DatasetVariant.V1.value,
     dataset_local_path: str | None = None,
     dataset_repo_id: str | None = None,
     max_examples: int = -1,
@@ -26,6 +27,7 @@ def load_environment(
     default_examples: int = 64,
 ) -> vf.Environment:
     resolved_output_mode = OutputMode(output_mode)
+    resolved_dataset_variant = DatasetVariant(dataset_variant)
     resolved_eval_split = eval_split or ("validation" if split == "train" else split)
     train_dataset_source = load_chart_dataset(
         split=split,
@@ -33,6 +35,7 @@ def load_environment(
         repo_id=dataset_repo_id,
         seed=seed,
         default_examples=default_examples,
+        variant=resolved_dataset_variant,
     )
     eval_dataset_source = load_chart_dataset(
         split=resolved_eval_split,
@@ -40,6 +43,7 @@ def load_environment(
         repo_id=dataset_repo_id,
         seed=seed,
         default_examples=default_examples,
+        variant=resolved_dataset_variant,
     )
     if max_examples > 0:
         train_limit = min(max_examples, len(train_dataset_source))

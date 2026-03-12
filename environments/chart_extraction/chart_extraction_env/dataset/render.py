@@ -7,6 +7,7 @@ import matplotlib
 matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 from .models import AnnotationProfile, ChartRecipe, ChartType
 
@@ -47,7 +48,7 @@ def _render_line_chart(ax: plt.Axes, recipe: ChartRecipe) -> None:
     series = recipe.answer.series[0]
     x_values = [float(point.x) for point in series.points]
     y_values = [point.y for point in series.points]
-    marker = "o" if recipe.render_plan.show_markers else None
+    marker = "o" if recipe.render_plan.show_markers and recipe.render_plan.marker_size > 0.0 else None
     ax.plot(
         x_values,
         y_values,
@@ -56,6 +57,7 @@ def _render_line_chart(ax: plt.Axes, recipe: ChartRecipe) -> None:
         marker=marker,
         markersize=recipe.render_plan.marker_size,
     )
+    _apply_line_ticks(ax, len(x_values))
     if recipe.spec.annotation_profile == AnnotationProfile.ENDPOINT_LABELS:
         ax.annotate(
             recipe.series_name,
@@ -69,11 +71,13 @@ def _render_line_chart(ax: plt.Axes, recipe: ChartRecipe) -> None:
 
 def _render_bar_chart(ax: plt.Axes, recipe: ChartRecipe) -> None:
     series = recipe.answer.series[0]
-    x_values = [str(point.x) for point in series.points]
+    x_labels = [str(point.x) for point in series.points]
     y_values = [point.y for point in series.points]
-    bars = ax.bar(x_values, y_values, color=recipe.render_plan.color_hex)
+    positions = np.arange(len(x_labels))
+    bars = ax.bar(positions, y_values, color=recipe.render_plan.color_hex)
+    _apply_bar_ticks(ax, positions, x_labels)
     if recipe.spec.annotation_profile == AnnotationProfile.ENDPOINT_LABELS:
-        for bar in bars:
+        for bar in _bars_to_annotate(bars):
             height = bar.get_height()
             ax.annotate(
                 f"{height:.1f}",
@@ -84,3 +88,30 @@ def _render_bar_chart(ax: plt.Axes, recipe: ChartRecipe) -> None:
                 va="bottom",
                 fontsize=8,
             )
+
+
+def _apply_line_ticks(ax: plt.Axes, point_count: int) -> None:
+    if point_count <= 12:
+        return
+    tick_count = 7 if point_count <= 120 else 9
+    tick_positions = np.linspace(0, point_count - 1, num=tick_count, dtype=int)
+    ax.set_xticks(tick_positions)
+
+
+def _apply_bar_ticks(ax: plt.Axes, positions: np.ndarray, labels: list[str]) -> None:
+    count = len(labels)
+    if count <= 14:
+        ax.set_xticks(positions, labels)
+        return
+    stride = max(1, count // 10)
+    tick_positions = positions[::stride]
+    tick_labels = labels[::stride]
+    ax.set_xticks(tick_positions, tick_labels)
+
+
+def _bars_to_annotate(bars) -> list:
+    bar_list = list(bars)
+    if len(bar_list) <= 16:
+        return bar_list
+    tallest = max(bar_list, key=lambda bar: bar.get_height())
+    return [tallest]

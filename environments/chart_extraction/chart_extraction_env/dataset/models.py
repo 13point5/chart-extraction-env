@@ -5,6 +5,11 @@ from enum import Enum
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class DatasetVariant(str, Enum):
+    V1 = "v1"
+    DENSE_NOISY_V1 = "dense_noisy_v1"
+
+
 class ChartType(str, Enum):
     LINE = "line"
     BAR = "bar"
@@ -28,6 +33,16 @@ class DataProfile(str, Enum):
     ZIGZAG = "zigzag"
     FLAT = "flat"
     RANDOM_WALK = "random_walk"
+    NOISY_TREND_UP = "noisy_trend_up"
+    NOISY_TREND_DOWN = "noisy_trend_down"
+    LOSS_DECAY = "loss_decay"
+    GROWTH_SATURATING = "growth_saturating"
+    SEASONAL = "seasonal"
+    SPIKY = "spiky"
+    STEP_CHANGE = "step_change"
+    BUSINESS_RANDOM = "business_random"
+    BUSINESS_SORTED = "business_sorted"
+    BUSINESS_OUTLIER = "business_outlier"
 
 
 class XMode(str, Enum):
@@ -46,6 +61,9 @@ class StyleProfile(str, Enum):
     GRID = "grid"
     MARKERS = "markers"
     GRID_MARKERS = "grid_markers"
+    ML_DENSE = "ml_dense"
+    BUSINESS_GRID = "business_grid"
+    BUSINESS_LABELS = "business_labels"
 
 
 class AnnotationProfile(str, Enum):
@@ -64,6 +82,7 @@ class ImageSizeProfile(str, Enum):
     MEDIUM_SQUARE = "medium_square"
     MEDIUM_WIDE = "medium_wide"
     LARGE_WIDE = "large_wide"
+    XL_WIDE = "xl_wide"
     MEDIUM_TALL = "medium_tall"
 
 
@@ -77,6 +96,7 @@ class YScaleProfile(str, Enum):
 class ChartSpec(BaseModel):
     model_config = ConfigDict(frozen=True)
 
+    variant: DatasetVariant
     chart_type: ChartType
     data_profile: DataProfile
     x_mode: XMode
@@ -86,7 +106,7 @@ class ChartSpec(BaseModel):
     layout_profile: LayoutProfile
     image_size_profile: ImageSizeProfile
     y_scale_profile: YScaleProfile
-    num_points: int = Field(ge=4, le=40)
+    num_points: int = Field(ge=4, le=500)
     seed: int
 
 
@@ -141,6 +161,7 @@ class ExampleInfo(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     version: str = "v1"
+    variant: DatasetVariant
     split: str
     chart_type: ChartType
     data_profile: DataProfile
@@ -174,3 +195,4 @@ class DatasetBuildConfig(BaseModel):
     test_size: int = Field(default=64, ge=1)
     seed: int = 7
     version: str = "v1"
+    variant: DatasetVariant = DatasetVariant.V1

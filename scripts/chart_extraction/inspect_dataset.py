@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 from collections import Counter
+from statistics import mean
 from pathlib import Path
 
 from datasets import DatasetDict, load_dataset, load_from_disk
@@ -22,9 +23,25 @@ def main() -> None:
     for split, split_dataset in dataset.items():
         print(f"\n## {split} ({len(split_dataset)} rows)")
         info_rows = [json.loads(payload) for payload in split_dataset["info"]]
-        for field in ["chart_type", "data_profile", "style_profile", "label_profile", "image_size_profile"]:
+        for field in [
+            "variant",
+            "chart_type",
+            "data_profile",
+            "style_profile",
+            "label_profile",
+            "image_size_profile",
+        ]:
             counter = Counter(str(row[field]) for row in info_rows)
             print(f"{field}: {dict(counter)}")
+        point_counts = [int(row["num_points"]) for row in info_rows]
+        print(
+            "num_points: "
+            f"min={min(point_counts)} "
+            f"p50={_percentile(point_counts, 50)} "
+            f"p90={_percentile(point_counts, 90)} "
+            f"max={max(point_counts)} "
+            f"mean={mean(point_counts):.1f}"
+        )
 
         for row_index in range(min(args.preview_rows, len(split_dataset))):
             row = split_dataset[row_index]
@@ -42,6 +59,12 @@ def load_chart_dataset(*, local_path: str, repo_id: str) -> DatasetDict:
     if repo_id:
         return load_dataset(repo_id)
     raise ValueError("Pass either --local-path or --repo-id.")
+
+
+def _percentile(values: list[int], percentile: int) -> int:
+    ordered = sorted(values)
+    index = int((len(ordered) - 1) * (percentile / 100))
+    return ordered[index]
 
 
 if __name__ == "__main__":

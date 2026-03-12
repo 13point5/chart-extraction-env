@@ -7,7 +7,7 @@ from datasets import Dataset, DatasetDict, Features, Image, Value, load_dataset,
 from huggingface_hub import HfApi
 
 from .generator import build_split_examples, canonical_answer_json, canonical_info_json
-from .models import GeneratedExample
+from .models import DatasetVariant, GeneratedExample
 
 DATASET_FEATURES = Features(
     {
@@ -48,6 +48,7 @@ def load_chart_dataset(
     repo_id: str | None = None,
     seed: int = 7,
     default_examples: int = 64,
+    variant: DatasetVariant = DatasetVariant.V1,
 ) -> Dataset:
     if local_path:
         loaded = load_from_disk(local_path)
@@ -58,7 +59,13 @@ def load_chart_dataset(
     if repo_id:
         return load_dataset(repo_id, split=split)
 
-    examples = build_split_examples(split=split, num_examples=default_examples, seed=seed)
+    examples = build_split_examples(
+        split=split,
+        num_examples=default_examples,
+        seed=seed,
+        variant=variant,
+        version=variant.value,
+    )
     return Dataset.from_list([example_to_row(example) for example in examples], features=DATASET_FEATURES)
 
 
