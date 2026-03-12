@@ -136,14 +136,14 @@ The first local JSON smoke run looked much worse than it should have because the
 ### Main Baseline Results
 
 
-| Run ID     | Env source | Dataset source     | Mode     | Examples | Avg reward | Point value | X type | Avg output tokens | Notes                              |
-| ---------- | ---------- | ------------------ | -------- | -------- | ---------- | ----------- | ------ | ----------------- | ---------------------------------- |
-| `70c7e525` | local      | in-memory fallback | JSON     | 3        | 0.8456     | 0.9911      | 0.0000 | 149.3             | pre-fix, invisible series-name bug |
-| `5484796c` | local      | in-memory fallback | JSON     | 4        | 0.9949     | 0.9899      | 1.0000 | 134.8             | post-fix                           |
-| `756c8503` | local      | in-memory fallback | Markdown | 4        | 0.9949     | 0.9898      | 1.0000 | 81.5              | post-fix                           |
-| `dd909236` | local      | in-memory fallback | JSON     | 2        | 0.9944     | 0.9889      | 1.0000 | 143.5             | post-typing cleanup                |
-| `539bc21e` | pushed env | HF dataset         | JSON     | 8        | 0.9963     | 0.9926      | 1.0000 | 142.8             | upstream path                      |
-| `2503bf4b` | pushed env | HF dataset         | Markdown | 8        | 0.9964     | 0.9928      | 1.0000 | 84.8              | upstream path                      |
+| Run ID     | Model                       | Env source | Dataset source     | Mode     | Examples | Avg reward | Point value | X type | Avg output tokens | Notes                              |
+| ---------- | --------------------------- | ---------- | ------------------ | -------- | -------- | ---------- | ----------- | ------ | ----------------- | ---------------------------------- |
+| `70c7e525` | `qwen/qwen3-vl-8b-instruct` | local      | in-memory fallback | JSON     | 3        | 0.8456     | 0.9911      | 0.0000 | 149.3             | pre-fix, invisible series-name bug |
+| `5484796c` | `qwen/qwen3-vl-8b-instruct` | local      | in-memory fallback | JSON     | 4        | 0.9949     | 0.9899      | 1.0000 | 134.8             | post-fix                           |
+| `756c8503` | `qwen/qwen3-vl-8b-instruct` | local      | in-memory fallback | Markdown | 4        | 0.9949     | 0.9898      | 1.0000 | 81.5              | post-fix                           |
+| `dd909236` | `qwen/qwen3-vl-8b-instruct` | local      | in-memory fallback | JSON     | 2        | 0.9944     | 0.9889      | 1.0000 | 143.5             | post-typing cleanup                |
+| `539bc21e` | `qwen/qwen3-vl-8b-instruct` | pushed env | HF dataset         | JSON     | 8        | 0.9963     | 0.9926      | 1.0000 | 142.8             | upstream path                      |
+| `2503bf4b` | `qwen/qwen3-vl-8b-instruct` | pushed env | HF dataset         | Markdown | 8        | 0.9964     | 0.9928      | 1.0000 | 84.8              | upstream path                      |
 
 
 ### Baseline Takeaways
@@ -263,5 +263,4 @@ For this v1 task, JSON is the better default training target. Markdown is viable
 | Dataset CLI        | `environments/chart_extraction/chart_extraction_env/dataset_cli.py`                                                               |
 | Dataset inspection | `scripts/chart_extraction/inspect_dataset.py`                                                                                     |
 | Work logs          | `logs/01-dataset-generator.md`, `logs/02-environment-and-baselines.md`, `logs/03-rl-experiments.md`, `logs/04-ops-and-configs.md` |
-
 
