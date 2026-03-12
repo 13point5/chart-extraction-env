@@ -34,6 +34,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-tokens", type=int, default=2048)
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--default-examples", type=int, default=64)
+    parser.add_argument("--max-examples", type=int, default=-1)
     parser.add_argument("--dataset-repo-id", default="")
     parser.add_argument("--dataset-local-path", default="")
     parser.add_argument("--dataset-variant", default="")
@@ -55,6 +56,8 @@ def main() -> None:
     for mode_name in args.modes:
         mode = EVAL_MODES[mode_name]
         env_args = {"default_examples": args.default_examples, "output_mode": mode.output_mode}
+        if args.max_examples > 0:
+            env_args["max_examples"] = args.max_examples
         if args.dataset_repo_id:
             env_args["dataset_repo_id"] = args.dataset_repo_id
         if args.dataset_local_path:

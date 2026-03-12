@@ -42,6 +42,30 @@ def main() -> None:
             f"max={max(point_counts)} "
             f"mean={mean(point_counts):.1f}"
         )
+        answer_lengths = [len(answer) for answer in split_dataset["answer"]]
+        print(
+            "answer_chars: "
+            f"min={min(answer_lengths)} "
+            f"p50={_percentile(answer_lengths, 50)} "
+            f"p90={_percentile(answer_lengths, 90)} "
+            f"max={max(answer_lengths)} "
+            f"mean={mean(answer_lengths):.1f}"
+        )
+        for chart_type in ["line", "bar"]:
+            chart_type_points = [
+                int(row["num_points"])
+                for row in info_rows
+                if str(row["chart_type"]) == chart_type
+            ]
+            if chart_type_points:
+                print(
+                    f"{chart_type}_num_points: "
+                    f"min={min(chart_type_points)} "
+                    f"p50={_percentile(chart_type_points, 50)} "
+                    f"p90={_percentile(chart_type_points, 90)} "
+                    f"max={max(chart_type_points)} "
+                    f"mean={mean(chart_type_points):.1f}"
+                )
 
         for row_index in range(min(args.preview_rows, len(split_dataset))):
             row = split_dataset[row_index]
