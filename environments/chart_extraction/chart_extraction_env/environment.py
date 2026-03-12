@@ -20,6 +20,7 @@ def load_environment(
     eval_split: str | None = None,
     output_mode: str = OutputMode.JSON.value,
     dataset_variant: str = DatasetVariant.V1.value,
+    chart_type_filter: str | None = None,
     dataset_local_path: str | None = None,
     dataset_repo_id: str | None = None,
     max_examples: int = -1,
@@ -36,6 +37,7 @@ def load_environment(
         seed=seed,
         default_examples=default_examples,
         variant=resolved_dataset_variant,
+        chart_type_filter=chart_type_filter,
     )
     eval_dataset_source = load_chart_dataset(
         split=resolved_eval_split,
@@ -44,6 +46,7 @@ def load_environment(
         seed=seed,
         default_examples=default_examples,
         variant=resolved_dataset_variant,
+        chart_type_filter=chart_type_filter,
     )
     if max_examples > 0:
         train_limit = min(max_examples, len(train_dataset_source))

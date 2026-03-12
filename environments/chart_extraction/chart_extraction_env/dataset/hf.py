@@ -49,15 +49,19 @@ def load_chart_dataset(
     seed: int = 7,
     default_examples: int = 64,
     variant: DatasetVariant = DatasetVariant.V1,
+    chart_type_filter: str | None = None,
 ) -> Dataset:
     if local_path:
         loaded = load_from_disk(local_path)
         if isinstance(loaded, DatasetDict):
-            return loaded[split]
-        return loaded
+            dataset = loaded[split]
+        else:
+            dataset = loaded
+        return filter_chart_dataset(dataset, chart_type_filter)
 
     if repo_id:
-        return load_dataset(repo_id, split=split)
+        dataset = load_dataset(repo_id, split=split)
+        return filter_chart_dataset(dataset, chart_type_filter)
 
     examples = build_split_examples(
         split=split,
@@ -66,7 +70,24 @@ def load_chart_dataset(
         variant=variant,
         version=variant.value,
     )
-    return Dataset.from_list([example_to_row(example) for example in examples], features=DATASET_FEATURES)
+    dataset = Dataset.from_list([example_to_row(example) for example in examples], features=DATASET_FEATURES)
+    return filter_chart_dataset(dataset, chart_type_filter)
+
+
+def filter_chart_dataset(dataset: Dataset, chart_type_filter: str | None) -> Dataset:
+    if not chart_type_filter:
+        return dataset
+    allowed_chart_types = {
+        item.strip()
+        for item in chart_type_filter.split(",")
+        if item.strip()
+    }
+    if not allowed_chart_types:
+        return dataset
+    return dataset.filter(
+        lambda example: json.loads(example["info"])["chart_type"] in allowed_chart_types,
+        desc=f"Filter chart_type in {sorted(allowed_chart_types)}",
+    )
 
 
 def push_dataset_dict(
