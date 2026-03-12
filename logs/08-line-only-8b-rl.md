@@ -9,3 +9,9 @@
 - 2026-03-11 22:33:00 EDT: local markdown smoke eval on 5 examples succeeded against the Hugging Face dataset with `output_mode="markdown"`. Average reward was `0.740`; `format_valid`, `chart_type_score`, and `x_type_score_metric` were perfect on the sample; `is_truncated` averaged `0.400`, so I kept `max_tokens=4096` and did not lower it.
 - 2026-03-11 22:41:00 EDT: local JSON smoke eval on the same line-only setup succeeded with `output_mode="json"`. Average reward was `0.542`; `is_truncated` averaged `0.000`; outputs were materially coarser on dense lines than the markdown baseline.
 - 2026-03-11 22:41:00 EDT: takeaway before RL is unchanged: markdown is the stronger starting target on dense line charts, but JSON remains a useful comparator because it is faster and less truncation-prone.
+- 2026-03-11 22:41:48 EDT: pushed updated environment version `13point5/chart-extraction@0.1.1` with line-only dataset filtering support.
+- 2026-03-11 22:42:34 EDT: checked the Prime environment action status for `0.1.1`; integration job `dklpdqup1i8mxwg8gyk93488` completed with `SUCCESS`.
+- 2026-03-11 22:43:29 EDT: launched hosted RL run `jp2xfslsy7io92dz6idgozst` for the JSON config (`qwen3-vl-8b-json-dense-line-v1`).
+- 2026-03-11 22:43:29 EDT: launched hosted RL run `nmnb0uqwu2gl1trjhj2r9nb6` for the Markdown config (`qwen3-vl-8b-markdown-dense-line-v1`).
+- 2026-03-11 22:43:29 EDT: both runs were accepted by hosted RL against `13point5/chart-extraction@0.1.1` and entered the `QUEUED` state with the expected line-only environment args and validation schedule.
+- 2026-03-11 22:43:35 EDT: both hosted RL runs transitioned from `QUEUED` to `RUNNING`, confirming that the new environment version and config payloads were accepted by the trainer backend.
