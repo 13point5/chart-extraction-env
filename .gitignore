@@ -13,3 +13,5 @@ wheels/
 outputs/
 environments/*/outputs/
 environments/*/.prime/
+
+reports/

@@ -4,7 +4,7 @@ batch_size = 128
 rollouts_per_example = 8
 
 [sampling]
-max_tokens = 4096
+max_tokens = 15000
 
 [[env]]
 id = "13point5/chart-extraction"
