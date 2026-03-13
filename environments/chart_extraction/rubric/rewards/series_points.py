@@ -72,7 +72,7 @@ def weighted_series_average(
     return float(np.average(ratios, weights=weights))
 
 
-async def series_point_count_ratio_reward(
+async def series_point_count_ratio(
     state: RubricState,
     info,
     logger: logging.Logger,
@@ -84,7 +84,6 @@ async def series_point_count_ratio_reward(
     predicted_series: dict[str, ChartSeries] = {
         item.name: item for item in parsed_answer.series if item.name
     }
-
     gold_series: dict[str, GoldSeries] = {
         series.name: series
         for series in (
