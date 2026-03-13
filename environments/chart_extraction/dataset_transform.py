@@ -1,12 +1,10 @@
 import base64
-import functools
 import io
 import json
 
 from datasets import load_dataset
 
 USER_PROMPT_TEXT = "Extract the data from this line chart image."
-TRANSFORM_VERSION = "v2"
 
 
 def strip_text(text: str | None) -> str:
@@ -81,18 +79,16 @@ def transform_row(row: dict, instruction_text: str) -> dict:
 
 def load_chart_extraction_dataset(
     instruction_text: str,
-    max_examples: int = -1,
+    split: str = "test",
+    num_examples: int = -1,
     seed: int = 135,
 ):
-    dataset = load_dataset("13point5/lineex-test", split="test")
+    dataset = load_dataset("13point5/line-ex", split=split)
     dataset = dataset.shuffle(seed=seed)
-    if max_examples > 0:
-        dataset = dataset.select(range(min(max_examples, len(dataset))))
-    transform = functools.partial(transform_row, instruction_text=instruction_text)
+    if num_examples > 0:
+        dataset = dataset.select(range(min(num_examples, len(dataset))))
+
     return dataset.map(
-        transform,
+        lambda row: transform_row(row, instruction_text=instruction_text),
         remove_columns=dataset.column_names,
-        new_fingerprint=(
-            f"chart-extraction-transform-{TRANSFORM_VERSION}-{len(dataset)}-{seed}"
-        ),
     )
