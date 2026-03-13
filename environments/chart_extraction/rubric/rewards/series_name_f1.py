@@ -1,5 +1,4 @@
-def trimmed_name_set(names) -> set[str]:
-    return {str(name).strip() for name in names if str(name).strip()}
+from ..state import RubricState
 
 
 def f1_score(predicted: set[str], gold: set[str]) -> float:
@@ -17,11 +16,11 @@ def f1_score(predicted: set[str], gold: set[str]) -> float:
     return 2 * precision * recall / (precision + recall)
 
 
-async def series_name_f1_reward(state, info) -> float:
-    parsed_answer = state.get("parsed_answer")
+async def series_name_f1_reward(state: RubricState, info) -> float:
+    parsed_answer = state["parsed_answer"] if "parsed_answer" in state else None
     if parsed_answer is None:
         return 0.0
 
-    predicted_names = trimmed_name_set(item.name for item in parsed_answer.series)
-    gold_names = trimmed_name_set(info.get("legend_names", []))
+    predicted_names = {item.name for item in parsed_answer.series if item.name}
+    gold_names = {name for name in info.get("legend_names", []) if name}
     return f1_score(predicted_names, gold_names)

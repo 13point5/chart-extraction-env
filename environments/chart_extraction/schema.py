@@ -2,17 +2,23 @@
 
 import json
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
-class ChartSeries(BaseModel):
+class NormalizedBaseModel(BaseModel):
+    """Base model that strips surrounding whitespace from all strings once."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+
+class ChartSeries(NormalizedBaseModel):
     """A single series in the chart."""
 
     name: str = Field(description="Series name")
     points: list[list[float]] = Field(description="Data points: [[x0, y0], [x1, y1], ...]")
 
 
-class ChartExtraction_V1(BaseModel):
+class ChartExtraction_V1(NormalizedBaseModel):
     """Extracted data from a line chart image."""
 
     title: str = Field(description="Title of the chart")
