@@ -2,7 +2,7 @@ import verifiers as vf
 
 from dataset_transform import USER_PROMPT_TEXT, load_chart_extraction_dataset
 from prompts import DEFAULT_SYSTEM_PROMPT_V1
-from rubric import rubric
+from rubric import parser, rubric
 
 
 def load_environment(max_examples: int = -1, **kwargs) -> vf.Environment:
@@ -18,5 +18,6 @@ def load_environment(max_examples: int = -1, **kwargs) -> vf.Environment:
 
     return vf.SingleTurnEnv(
         dataset=dataset,
+        parser=parser,
         rubric=rubric,
     )

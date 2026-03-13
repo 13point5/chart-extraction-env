@@ -2,7 +2,7 @@
 name = "chart-extraction"
 description = "Environment for extracting structured data from line chart images"
 tags = ["single-turn", "multimodal", "vision", "eval"]
-version = "0.1.1"
+version = "0.1.2"
 requires-python = ">=3.10"
 dependencies = [
     "pydantic>=2.12.5",
@@ -14,7 +14,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
-include = ["chart_extraction.py", "dataset_transform.py", "schema.py", "prompts.py", "rubric.py", "pyproject.toml"] 
+include = ["chart_extraction.py", "dataset_transform.py", "schema.py", "prompts.py", "rubric/*.py", "rubric/rewards/*.py", "pyproject.toml"] 
 
 [tool.verifiers.eval]
 num_examples = 5
