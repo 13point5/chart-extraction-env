@@ -1,4 +1,4 @@
-model = "qwen/qwen3-vl-8b-instruct"
+model = "Qwen/Qwen3-VL-8B-Instruct"
 max_steps = 300
 batch_size = 512
 rollouts_per_example = 8
@@ -13,6 +13,7 @@ args = { split = "train" }
 [wandb]
 project = "chart-extraction"
 name = "qwen3-vl-8b-batch-512"
+entity = "13point5-labs"
 
 [eval]
 interval = 25
