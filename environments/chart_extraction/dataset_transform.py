@@ -85,9 +85,12 @@ def transform_row(row: dict) -> dict:
 def load_chart_extraction_dataset(
     split: str = "test",
 ):
-    dataset = load_dataset("13point5/line-ex", split=split)
+    def build():
+        dataset = load_dataset("13point5/line-ex", split=split)
 
-    return dataset.map(
-        lambda row: transform_row(row),
-        remove_columns=dataset.column_names,
-    )
+        return dataset.map(
+            lambda row: transform_row(row),
+            remove_columns=dataset.column_names,
+        )
+
+    return build
