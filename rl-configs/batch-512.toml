@@ -14,20 +14,20 @@ project = "chart-extraction"
 name = "qwen3-vl-8b-batch-512"
 entity = "13point5-labs"
 
-[eval]
-interval = 25
-num_examples = 1000
-rollouts_per_example = 1
-eval_base_model = true
+# [eval]
+# interval = 25
+# num_examples = 1000
+# rollouts_per_example = 1
+# eval_base_model = true
 
-[[eval.env]]
-id = "13point5/chart-extraction"
-args = { split = "test" }
+# [[eval.env]]
+# id = "13point5/chart-extraction"
+# args = { split = "test" }
 
-[val]
-num_examples = 100
-rollouts_per_example = 1
-interval = 25
+# [val]
+# num_examples = 100
+# rollouts_per_example = 1
+# interval = 25
 
 # Optional: buffer configuration for difficulty filtering
 # [buffer]
