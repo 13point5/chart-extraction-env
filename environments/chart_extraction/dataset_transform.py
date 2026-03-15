@@ -3,6 +3,7 @@ import io
 import json
 
 from datasets import load_dataset
+from prompts import DEFAULT_SYSTEM_PROMPT_V1
 
 USER_PROMPT_TEXT = "Extract the data from this line chart image."
 
@@ -58,37 +59,35 @@ def build_info(row: dict) -> str:
     return json.dumps(info, separators=(",", ":"))
 
 
-def build_prompt(image, instruction_text: str) -> list[dict]:
+def build_prompt(image) -> list[dict]:
     return [
+        {
+            "role": "system",
+            "content": [{"type": "text", "text": DEFAULT_SYSTEM_PROMPT_V1}],
+        },
         {
             "role": "user",
             "content": [
-                {"type": "text", "text": instruction_text},
+                {"type": "text", "text": USER_PROMPT_TEXT},
                 {"type": "image_url", "image_url": {"url": image_to_data_url(image)}},
             ],
-        }
+        },
     ]
 
 
-def transform_row(row: dict, instruction_text: str) -> dict:
+def transform_row(row: dict) -> dict:
     return {
-        "prompt": build_prompt(row["image"], instruction_text),
+        "prompt": build_prompt(row["image"]),
         "info": build_info(row),
     }
 
 
 def load_chart_extraction_dataset(
-    instruction_text: str,
     split: str = "test",
-    num_examples: int = -1,
-    seed: int = 135,
 ):
     dataset = load_dataset("13point5/line-ex", split=split)
-    dataset = dataset.shuffle(seed=seed)
-    if num_examples > 0:
-        dataset = dataset.select(range(min(num_examples, len(dataset))))
 
     return dataset.map(
-        lambda row: transform_row(row, instruction_text=instruction_text),
+        lambda row: transform_row(row),
         remove_columns=dataset.column_names,
     )
