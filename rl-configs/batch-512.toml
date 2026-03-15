@@ -8,7 +8,6 @@ max_tokens = 10000
 
 [[env]]
 id = "13point5/chart-extraction"
-args = { split = "train" }
 
 [wandb]
 project = "chart-extraction"
