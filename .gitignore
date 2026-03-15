@@ -12,3 +12,5 @@ wheels/
 # outputs from `prime eval run`
 outputs/
 environments/*/outputs/
+
+secrets.env
