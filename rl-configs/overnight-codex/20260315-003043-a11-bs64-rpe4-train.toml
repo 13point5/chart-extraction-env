@@ -1,0 +1,40 @@
+model = "Qwen/Qwen3-VL-8B-Instruct"
+max_steps = 300
+batch_size = 64
+rollouts_per_example = 4
+
+[sampling]
+max_tokens = 4000
+
+[[env]]
+id = "13point5/chart-extraction"
+args = { split = "train" }
+
+[wandb]
+project = "chart-extraction"
+name = "qwen3-vl-8b-bs64-rpe4-train-a11"
+entity = "13point5-labs"
+
+[eval]
+interval = 50
+num_examples = 100
+rollouts_per_example = 1
+eval_base_model = true
+
+[[eval.env]]
+id = "13point5/chart-extraction"
+args = { split = "test" }
+
+[val]
+num_examples = 25
+rollouts_per_example = 1
+interval = 50
+
+# Optional: buffer configuration for difficulty filtering
+# [buffer]
+# easy_threshold = 0.8
+# hard_threshold = 0.2
+# easy_fraction = 0.0
+# hard_fraction = 0.0
+# online_difficulty_filtering = false
+# seed = 42

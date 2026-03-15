@@ -1,0 +1,238 @@
+{
+  "config_fingerprints": {
+    "{\"batch_size\": 128, \"eval_interval\": 25, \"eval_num_examples\": 1000, \"eval_split\": \"test\", \"learning_rate\": null, \"model\": \"Qwen/Qwen3-VL-8B-Instruct\", \"rollouts_per_example\": 8, \"sampling_max_tokens\": 10000, \"train_split\": \"train\", \"val_interval\": 25, \"val_num_examples\": 100}": "rl-configs/batch-128.toml",
+    "{\"batch_size\": 128, \"eval_interval\": 50, \"eval_num_examples\": 100, \"eval_split\": \"test\", \"learning_rate\": null, \"model\": \"Qwen/Qwen3-VL-8B-Instruct\", \"rollouts_per_example\": 4, \"sampling_max_tokens\": 4000, \"train_split\": \"train\", \"val_interval\": 50, \"val_num_examples\": 25}": "rl-configs/overnight/20260315-000020-a10-bs128-rpe4-train.toml",
+    "{\"batch_size\": 16, \"eval_interval\": 50, \"eval_num_examples\": 100, \"eval_split\": \"test[:200]\", \"learning_rate\": null, \"model\": \"Qwen/Qwen3-VL-8B-Instruct\", \"rollouts_per_example\": 2, \"sampling_max_tokens\": 2000, \"train_split\": \"train[:2000]\", \"val_interval\": 50, \"val_num_examples\": 25}": "rl-configs/overnight/20260315-083626-a14-bs16-rpe2-train-2000.toml",
+    "{\"batch_size\": 16, \"eval_interval\": 50, \"eval_num_examples\": 100, \"eval_split\": \"test[:200]\", \"learning_rate\": null, \"model\": \"Qwen/Qwen3-VL-8B-Instruct\", \"rollouts_per_example\": 4, \"sampling_max_tokens\": 4000, \"train_split\": \"train[:2000]\", \"val_interval\": 50, \"val_num_examples\": 25}": "rl-configs/overnight/20260315-083641-a15-bs16-rpe4-train-2000.toml",
+    "{\"batch_size\": 256, \"eval_interval\": 25, \"eval_num_examples\": 1000, \"eval_split\": \"test\", \"learning_rate\": null, \"model\": \"Qwen/Qwen3-VL-8B-Instruct\", \"rollouts_per_example\": 8, \"sampling_max_tokens\": 10000, \"train_split\": \"train\", \"val_interval\": 25, \"val_num_examples\": 100}": "rl-configs/batch-256.toml",
+    "{\"batch_size\": 32, \"eval_interval\": 50, \"eval_num_examples\": 100, \"eval_split\": \"test\", \"learning_rate\": null, \"model\": \"Qwen/Qwen3-VL-8B-Instruct\", \"rollouts_per_example\": 4, \"sampling_max_tokens\": 4000, \"train_split\": \"train\", \"val_interval\": 50, \"val_num_examples\": 25}": "rl-configs/overnight/20260315-010107-a12-bs32-rpe4-train.toml",
+    "{\"batch_size\": 32, \"eval_interval\": 50, \"eval_num_examples\": 100, \"eval_split\": \"test[:200]\", \"learning_rate\": null, \"model\": \"Qwen/Qwen3-VL-8B-Instruct\", \"rollouts_per_example\": 4, \"sampling_max_tokens\": 4000, \"train_split\": \"train[:2000]\", \"val_interval\": 50, \"val_num_examples\": 25}": "rl-configs/overnight/20260315-013135-a13-bs32-rpe4-train-2000.toml",
+    "{\"batch_size\": 64, \"eval_interval\": 50, \"eval_num_examples\": 100, \"eval_split\": \"test\", \"learning_rate\": null, \"model\": \"Qwen/Qwen3-VL-8B-Instruct\", \"rollouts_per_example\": 4, \"sampling_max_tokens\": 4000, \"train_split\": \"train\", \"val_interval\": 50, \"val_num_examples\": 25}": "rl-configs/overnight/20260315-003043-a11-bs64-rpe4-train.toml",
+    "{\"batch_size\": 64, \"eval_interval\": 50, \"eval_num_examples\": 100, \"eval_split\": \"test[:200]\", \"learning_rate\": null, \"model\": \"Qwen/Qwen3-VL-8B-Instruct\", \"rollouts_per_example\": 4, \"sampling_max_tokens\": 4000, \"train_split\": \"train[:2000]\", \"val_interval\": 50, \"val_num_examples\": 25}": "rl-configs/overnight/20260315-000013-a9-bs64-rpe4-train-2000.toml"
+  },
+  "config_history": [
+    {
+      "batch_size": 256,
+      "config_path": "rl-configs/batch-256.toml",
+      "eval_num_examples": 1000,
+      "rollouts_per_example": 8,
+      "sampling_max_tokens": 10000,
+      "timestamp": "2026-03-14 23:43:20 EDT",
+      "train_split": "train",
+      "val_num_examples": 100
+    },
+    {
+      "batch_size": 128,
+      "config_path": "rl-configs/batch-128.toml",
+      "eval_num_examples": 1000,
+      "rollouts_per_example": 8,
+      "sampling_max_tokens": 10000,
+      "timestamp": "2026-03-14 23:43:20 EDT",
+      "train_split": "train",
+      "val_num_examples": 100
+    },
+    {
+      "batch_size": 256,
+      "config_path": "rl-configs/batch-256.toml",
+      "eval_num_examples": 1000,
+      "rollouts_per_example": 8,
+      "sampling_max_tokens": 10000,
+      "timestamp": "2026-03-14 23:43:32 EDT",
+      "train_split": "train",
+      "val_num_examples": 100
+    },
+    {
+      "batch_size": 128,
+      "config_path": "rl-configs/batch-128.toml",
+      "eval_num_examples": 1000,
+      "rollouts_per_example": 8,
+      "sampling_max_tokens": 10000,
+      "timestamp": "2026-03-14 23:43:32 EDT",
+      "train_split": "train",
+      "val_num_examples": 100
+    },
+    {
+      "batch_size": 256,
+      "config_path": "rl-configs/batch-256.toml",
+      "eval_num_examples": 1000,
+      "rollouts_per_example": 8,
+      "sampling_max_tokens": 10000,
+      "timestamp": "2026-03-14 23:44:03 EDT",
+      "train_split": "train",
+      "val_num_examples": 100
+    },
+    {
+      "batch_size": 128,
+      "config_path": "rl-configs/batch-128.toml",
+      "eval_num_examples": 1000,
+      "rollouts_per_example": 8,
+      "sampling_max_tokens": 10000,
+      "timestamp": "2026-03-14 23:44:03 EDT",
+      "train_split": "train",
+      "val_num_examples": 100
+    },
+    {
+      "batch_size": 256,
+      "config_path": "rl-configs/batch-256.toml",
+      "eval_num_examples": 1000,
+      "rollouts_per_example": 8,
+      "sampling_max_tokens": 10000,
+      "timestamp": "2026-03-14 23:45:02 EDT",
+      "train_split": "train",
+      "val_num_examples": 100
+    },
+    {
+      "batch_size": 128,
+      "config_path": "rl-configs/batch-128.toml",
+      "eval_num_examples": 1000,
+      "rollouts_per_example": 8,
+      "sampling_max_tokens": 10000,
+      "timestamp": "2026-03-14 23:45:02 EDT",
+      "train_split": "train",
+      "val_num_examples": 100
+    },
+    {
+      "batch_size": 64,
+      "config_path": "rl-configs/overnight/20260315-000013-a9-bs64-rpe4-train-2000.toml",
+      "eval_num_examples": 100,
+      "rollouts_per_example": 4,
+      "sampling_max_tokens": 4000,
+      "timestamp": "2026-03-15 00:00:13 EDT",
+      "train_split": "train[:2000]",
+      "val_num_examples": 25
+    },
+    {
+      "batch_size": 128,
+      "config_path": "rl-configs/overnight/20260315-000020-a10-bs128-rpe4-train.toml",
+      "eval_num_examples": 100,
+      "rollouts_per_example": 4,
+      "sampling_max_tokens": 4000,
+      "timestamp": "2026-03-15 00:00:20 EDT",
+      "train_split": "train",
+      "val_num_examples": 25
+    },
+    {
+      "batch_size": 64,
+      "config_path": "rl-configs/overnight/20260315-003043-a11-bs64-rpe4-train.toml",
+      "eval_num_examples": 100,
+      "rollouts_per_example": 4,
+      "sampling_max_tokens": 4000,
+      "timestamp": "2026-03-15 00:30:43 EDT",
+      "train_split": "train",
+      "val_num_examples": 25
+    },
+    {
+      "batch_size": 32,
+      "config_path": "rl-configs/overnight/20260315-010107-a12-bs32-rpe4-train.toml",
+      "eval_num_examples": 100,
+      "rollouts_per_example": 4,
+      "sampling_max_tokens": 4000,
+      "timestamp": "2026-03-15 01:01:07 EDT",
+      "train_split": "train",
+      "val_num_examples": 25
+    },
+    {
+      "batch_size": 32,
+      "config_path": "rl-configs/overnight/20260315-013135-a13-bs32-rpe4-train-2000.toml",
+      "eval_num_examples": 100,
+      "rollouts_per_example": 4,
+      "sampling_max_tokens": 4000,
+      "timestamp": "2026-03-15 01:31:35 EDT",
+      "train_split": "train[:2000]",
+      "val_num_examples": 25
+    },
+    {
+      "batch_size": 16,
+      "config_path": "rl-configs/overnight/20260315-083626-a14-bs16-rpe2-train-2000.toml",
+      "eval_num_examples": 100,
+      "rollouts_per_example": 2,
+      "sampling_max_tokens": 2000,
+      "timestamp": "2026-03-15 08:36:26 EDT",
+      "train_split": "train[:2000]",
+      "val_num_examples": 25
+    },
+    {
+      "batch_size": 16,
+      "config_path": "rl-configs/overnight/20260315-083641-a15-bs16-rpe4-train-2000.toml",
+      "eval_num_examples": 100,
+      "rollouts_per_example": 4,
+      "sampling_max_tokens": 4000,
+      "timestamp": "2026-03-15 08:36:41 EDT",
+      "train_split": "train[:2000]",
+      "val_num_examples": 25
+    }
+  ],
+  "deadline": "2026-03-15T10:00:00-04:00",
+  "interval_minutes": 15,
+  "runs": {
+    "a0nku1fljpaikxz7b8va0crh": {
+      "config_path": "rl-configs/overnight/20260315-000020-a10-bs128-rpe4-train.toml",
+      "error": "BackoffLimitExceeded: Job has reached the specified backoff limit",
+      "handled_terminal_signature": "FAILED:BackoffLimitExceeded: Job has reached the specified backoff limit",
+      "last_checked_at": "2026-03-15 08:51:49 EDT",
+      "latest_step": null,
+      "status": "FAILED"
+    },
+    "ikeldlisk4usr8lxttpaa7ak": {
+      "config_path": "rl-configs/overnight/20260315-083641-a15-bs16-rpe4-train-2000.toml",
+      "handled_terminal_signature": null,
+      "last_checked_at": "2026-03-15 08:51:55 EDT",
+      "latest_step": null,
+      "status": "RUNNING"
+    },
+    "nq0mfqjnqwq7typq5u33osna": {
+      "config_path": "rl-configs/overnight/20260315-010107-a12-bs32-rpe4-train.toml",
+      "error": "BackoffLimitExceeded: Job has reached the specified backoff limit",
+      "handled_terminal_signature": "FAILED:BackoffLimitExceeded: Job has reached the specified backoff limit",
+      "last_checked_at": "2026-03-15 08:51:51 EDT",
+      "latest_step": null,
+      "status": "FAILED"
+    },
+    "qz587h100xaa0043n1fis62u": {
+      "config_path": "rl-configs/overnight/20260315-013135-a13-bs32-rpe4-train-2000.toml",
+      "handled_terminal_signature": "STOPPED:STOPPED",
+      "last_checked_at": "2026-03-15 08:51:53 EDT",
+      "latest_step": 5,
+      "status": "STOPPED"
+    },
+    "tc0qkylbwvqiivrrdjlnox8i": {
+      "config_path": "rl-configs/overnight/20260315-083626-a14-bs16-rpe2-train-2000.toml",
+      "handled_terminal_signature": null,
+      "last_checked_at": "2026-03-15 08:51:54 EDT",
+      "latest_step": 8,
+      "status": "RUNNING"
+    },
+    "th8ourpk2wolsjaa7g85dzjz": {
+      "config_path": "rl-configs/batch-128.toml",
+      "error": "BackoffLimitExceeded: Job has reached the specified backoff limit",
+      "handled_terminal_signature": "FAILED:BackoffLimitExceeded: Job has reached the specified backoff limit",
+      "last_checked_at": "2026-03-15 08:51:45 EDT",
+      "latest_step": null,
+      "status": "FAILED"
+    },
+    "u9afes3553ot5xfzd5vbjoyh": {
+      "config_path": "rl-configs/overnight/20260315-003043-a11-bs64-rpe4-train.toml",
+      "error": "BackoffLimitExceeded: Job has reached the specified backoff limit",
+      "handled_terminal_signature": "FAILED:BackoffLimitExceeded: Job has reached the specified backoff limit",
+      "last_checked_at": "2026-03-15 08:51:50 EDT",
+      "latest_step": null,
+      "status": "FAILED"
+    },
+    "xajf2l8rhqvi9tnoobfwfaga": {
+      "config_path": "rl-configs/overnight/20260315-000013-a9-bs64-rpe4-train-2000.toml",
+      "handled_terminal_signature": "STOPPED:STOPPED",
+      "last_checked_at": "2026-03-15 08:51:47 EDT",
+      "latest_step": 3,
+      "status": "STOPPED"
+    },
+    "z1ylga3z63hys093jfqz8rme": {
+      "config_path": "rl-configs/batch-256.toml",
+      "error": "BackoffLimitExceeded: Job has reached the specified backoff limit",
+      "handled_terminal_signature": "FAILED:BackoffLimitExceeded: Job has reached the specified backoff limit",
+      "last_checked_at": "2026-03-15 08:51:46 EDT",
+      "latest_step": null,
+      "status": "FAILED"
+    }
+  },
+  "started_at": "2026-03-14 23:43:20 EDT"
+}
