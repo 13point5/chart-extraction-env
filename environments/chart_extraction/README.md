@@ -24,7 +24,7 @@
   - `format_reward_func`: checks that the response follows the expected `<answer>...</answer>` format.
   - `series_name_f1`: computes F1 between predicted series names and gold legend names.
   - `series_point_count_ratio`: scores agreement on how many points each gold series contains, weighted by series length.
-  - `series_point_value`: scores matched point values by exact `x` and normalized `y` error, weighted by series length.
+  - `series_point_value`: scores matched series points with a point-only OKS criterion, giving credit only when predicted points land close to labeled gold points after chart-scale normalization.
 
 ### Quickstart
 
@@ -51,5 +51,5 @@ It always uses the dataset `train` split for rollouts and the `test` split for e
 | `format_reward_func`       | Output-format adherence score from the XML parser reward                       |
 | `series_name_f1`           | F1 score for predicted series names versus gold legend names                   |
 | `series_point_count_ratio` | Weighted agreement on the number of points in each gold series                 |
-| `series_point_value`       | Weighted point-value score based on exact `x` matches and normalized `y` error |
+| `series_point_value`       | Weighted point-only OKS score for labeled gold points, without nearby line-segment credit |
 | `num_turns`                | Number of turns taken in the rollout                                           |
