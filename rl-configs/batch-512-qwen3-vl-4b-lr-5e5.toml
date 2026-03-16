@@ -1,18 +1,19 @@
-model = "Qwen/Qwen3-VL-8B-Instruct"
+model = "Qwen/Qwen3-VL-4B-Instruct"
 max_steps = 300
 batch_size = 512
-rollouts_per_example = 8
-learning_rate = 1e-5
+rollouts_per_example = 16
+learning_rate = 5e-5
+env_file = ["../secrets.env"]
 
 [sampling]
-max_tokens = 10000
+max_tokens = 20000
 
 [[env]]
 id = "13point5/chart-extraction"
 
 [wandb]
 project = "chart-extraction"
-name = "qwen3-vl-8b-batch-512"
+name = "qwen3-vl-4b-batch-512-oks-lr-5e5"
 entity = "13point5-labs"
 
 [eval]
@@ -23,7 +24,6 @@ eval_base_model = true
 
 [[eval.env]]
 id = "13point5/chart-extraction"
-args = { split = "test" }
 
 [val]
 num_examples = 100
@@ -36,5 +36,5 @@ interval = 25
 # hard_threshold = 0.2
 # easy_fraction = 0.0
 # hard_fraction = 0.0
-# online_difficulty_filtering = false
+# online_difficulty_filtering = true
 # seed = 42

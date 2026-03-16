@@ -13,5 +13,5 @@ rubric.class_objects["logger"] = rubric.logger
 rubric.add_reward_func(cache_parsed_answer, weight=0.0)
 rubric.add_reward_func(parser.get_format_reward_func(), weight=1.0)
 rubric.add_reward_func(series_name_f1, weight=1.0)
-rubric.add_reward_func(series_point_count_ratio, weight=1.0)
-rubric.add_reward_func(series_point_value, weight=1.0)
+rubric.add_reward_func(series_point_count_ratio, weight=2.0)
+rubric.add_reward_func(series_point_value, weight=2.0)
