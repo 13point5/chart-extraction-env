@@ -1,7 +1,7 @@
 from typing import TypedDict
 
-from schema import ChartExtraction_V1
+from schemas import CanonicalChart
 
 
 class RubricState(TypedDict, total=False):
-    parsed_answer: ChartExtraction_V1 | None
+    parsed_answer: CanonicalChart | None

@@ -102,7 +102,6 @@ def command_error(argv: list[str], proc: subprocess.CompletedProcess[str]) -> Ru
 
 def run_command(
     argv: list[str],
-    *,
     env: dict[str, str] | None = None,
     input_text: str | None = None,
     timeout: int = 600,
@@ -122,7 +121,7 @@ def run_command(
     return proc.stdout.strip()
 
 
-def run_prime(args: list[str], *, env: dict[str, str] | None = None, timeout: int = 600) -> str:
+def run_prime(args: list[str], env: dict[str, str] | None = None, timeout: int = 600) -> str:
     if not PRIME_BIN:
         raise FileNotFoundError("prime CLI is not available on PATH")
     return run_command([PRIME_BIN, *args], env=env, timeout=timeout)
@@ -381,7 +380,6 @@ def codex_schema() -> dict[str, Any]:
 
 
 def call_codex_analysis(
-    *,
     run_id: str,
     run_details: dict[str, Any],
     progress: dict[str, Any],
@@ -608,7 +606,6 @@ def failure_signature(details: dict[str, Any], logs_tail: str) -> str:
 
 
 def handle_failed_run(
-    *,
     run_id: str,
     state: dict[str, Any],
     log_path: Path,
@@ -704,7 +701,6 @@ def handle_failed_run(
 
 
 def poll_runs(
-    *,
     state: dict[str, Any],
     log_path: Path,
     env: dict[str, str],

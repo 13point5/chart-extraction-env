@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import math
 
+from schemas import CanonicalPoint, parse_chart_extraction
 from ..state import RubricState
 
 
@@ -27,12 +28,8 @@ OKS_K = 0.025
 OKS_THRESHOLD = 0.5
 
 
-def _point_pairs(points: list[list[float]]) -> list[tuple[float, float]]:
-    return [
-        (float(point[0]), float(point[1]))
-        for point in points
-        if len(point) == 2
-    ]
+def _point_pairs(points: list[CanonicalPoint]) -> list[tuple[float, float]]:
+    return [(float(point.x), float(point.y)) for point in points]
 
 
 def _normalize_point(
@@ -69,9 +66,8 @@ def _nearest_gold_index(
 
 
 def series_point_value_score(
-    predicted_points: list[list[float]],
-    gold_points: list[list[float]],
-    *,
+    predicted_points: list[CanonicalPoint],
+    gold_points: list[CanonicalPoint],
     x_min: float,
     x_scale: float,
     y_min: float,
@@ -122,24 +118,32 @@ async def series_point_value(
     if parsed_answer is None:
         return 0.0
 
-    predicted_series = {
-        item.name: item.points
-        for item in parsed_answer.series
-        if item.name
+    predicted_series: dict[str, list[CanonicalPoint]] = {
+        item.name: item.points for item in parsed_answer.series if item.name
     }
-    gold_series = {
-        item["name"]: item.get("points", [])
-        for item in info.get("series", [])
-        if item.get("name")
+    schema_version = info.get("schema_version", "v1")
+    gold_answer = parse_chart_extraction(
+        info.get(
+            "expected_answer",
+            {
+                "title": info.get("title", ""),
+                "x_axis_label": info.get("x_axis_label", ""),
+                "y_axis_label": info.get("y_axis_label", ""),
+                "series": info.get("series", []),
+            },
+        ),
+        schema_version=schema_version,
+    ).to_canonical()
+
+    gold_series: dict[str, list[CanonicalPoint]] = {
+        item.name: item.points for item in gold_answer.series if item.name
     }
 
     if not gold_series:
         return 1.0 if not predicted_series else 0.0
 
     all_gold_pairs = [
-        pair
-        for gold_points in gold_series.values()
-        for pair in _point_pairs(gold_points)
+        pair for gold_points in gold_series.values() for pair in _point_pairs(gold_points)
     ]
     if not all_gold_pairs:
         return 1.0 if not predicted_series else 0.0
@@ -165,7 +169,8 @@ async def series_point_value(
                 x_scale=x_scale,
                 y_min=y_min,
                 y_scale=y_scale,
-            ) * weight
+            )
+            * weight
         )
         total_weight += weight
 

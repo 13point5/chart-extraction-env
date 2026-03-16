@@ -1,8 +1,7 @@
-from pydantic import BaseModel
-from schema import ChartExtraction_V1, get_json_schema_string
+from schemas import SchemaVersion, get_json_schema_string, get_schema_model
 
 
-SYSTEM_PROMPT_TEMPLATE_V1 = """
+SYSTEM_PROMPT_TEMPLATE = """
 You are a helpful assistant that extracts data from a chart image.
 
 The chart image will be a line chart with possibly multiple series.
@@ -15,7 +14,6 @@ The chart image will be a line chart with possibly multiple series.
    - Legend: series names shown in the legend
    - X-axis Label: label of the x-axis
    - Y-axis Label: label of the y-axis
-   - Data points for each series: [[x0, y0], [x1, y1], ...] depending on the JSON schema provided below
 
 # JSON Schema
 {json_schema}
@@ -25,20 +23,9 @@ The chart image will be a line chart with possibly multiple series.
 2. The JSON object must be wrapped inside <answer>...</answer> tags.
 """
 
+def get_system_prompt(schema_version: SchemaVersion) -> str:
+    """Return the system prompt for a specific schema version."""
 
-def get_system_prompt(
-    pydantic_model: type[BaseModel],
-    template: str = SYSTEM_PROMPT_TEMPLATE_V1,
-) -> str:
-    """Return the system prompt with the JSON schema. Uses ChartExtraction schema by default."""
-
-    json_schema = get_json_schema_string(pydantic_model)
-    prompt = template.format(json_schema=json_schema)
-
-    return prompt
-
-
-DEFAULT_SYSTEM_PROMPT_V1 = get_system_prompt(
-    pydantic_model=ChartExtraction_V1,
-    template=SYSTEM_PROMPT_TEMPLATE_V1,
-)
+    return SYSTEM_PROMPT_TEMPLATE.format(
+        json_schema=get_json_schema_string(get_schema_model(schema_version))
+    )

@@ -19,12 +19,20 @@
 
 - **Type**: `single-turn`
 - **Parser**: `XMLParser(["answer"])`
-- **Output format expectations**: Return a JSON object matching the chart extraction schema, wrapped in `<answer>...</answer>` tags.
-- **Rubric overview**: The main `reward` is an equally weighted average of four rewards:
-  - `format_reward_func`: checks that the response follows the expected `<answer>...</answer>` format.
-  - `series_name_f1`: computes F1 between predicted series names and gold legend names.
-  - `series_point_count_ratio`: scores agreement on how many points each gold series contains, weighted by series length.
-  - `series_point_value`: scores matched series points with a point-only OKS criterion, giving credit only when predicted points land close to labeled gold points after chart-scale normalization. It does not give credit for landing somewhere along the line segment between gold points.
+- **Output format expectations**: Return a JSON object matching the selected chart extraction schema, wrapped in `<answer>...</answer>` tags.
+- **Schema versions**:
+  - `v1`: original compact point format `[[x0, y0], [x1, y1], ...]`
+  - `v2`: explicit point objects with `index`, `x`, and `y`
+- **Schema implementation**:
+  - versioned model schemas live in [`schemas/v1.py`](./schemas/v1.py) and [`schemas/v2.py`](./schemas/v2.py)
+  - rewards use a schema-agnostic internal shape from [`schemas/canonical.py`](./schemas/canonical.py)
+  - both `v1` and `v2` parse into typed Pydantic models and then convert via `.to_canonical()` before scoring
+- **Rubric overview**: The main `reward` is a weighted sum of four rewards:
+  - `format_reward_func` (`weight = 1.0`): checks that the response follows the expected `<answer>...</answer>` format.
+  - `series_name_f1` (`weight = 1.0`): computes F1 between predicted series names and gold legend names.
+  - `series_point_count_ratio` (`weight = 2.0`): scores agreement on how many points each gold series contains, weighted by series length.
+  - `series_point_value` (`weight = 2.0`): scores matched series points with a point-only OKS criterion, giving credit only when predicted points land close to labeled gold points after chart-scale normalization. It does not give credit for landing somewhere along the line segment between gold points.
+- **Info payload**: The dataset `info` JSON includes `schema_version`, `expected_answer` in the same schema shown to the model, and the original dataset columns such as `chart_elements` and `lines` so you can compare raw annotations directly in Prime's UI.
 
 ### Quickstart
 
@@ -34,25 +42,46 @@ Run an evaluation with a vision model:
 prime eval run chart-extraction -m 'qwen/qwen3-vl-8b-instruct' -n 1 -r 1
 ```
 
+Run the `v2` schema explicitly:
+
+```bash
+prime eval run chart-extraction -m 'qwen/qwen3-vl-8b-instruct' -n 1 -r 1 --env-kwargs '{"schema_version":"v2"}'
+```
+
 Notes:
 
 - Use `-n` / `--num-examples` to limit how many examples are evaluated.
 
 ### Environment Arguments
 
-This environment does not currently expose custom `load_environment(...)` arguments.
-It always uses the dataset `train` split for rollouts and the `test` split for eval.
+- `schema_version`: chooses the output schema and matching gold `expected_answer` shape.
+  - default: `"v1"`
+  - `"v1"`: original compact point pairs
+  - `"v2"`: explicit indexed point objects
+
+The environment always uses the dataset `train` split for rollouts and the `test` split for eval.
 
 ### Metrics
 
 | Metric                     | Meaning                                                                        |
 | -------------------------- | ------------------------------------------------------------------------------ |
-| `reward`                   | Main scalar reward: the equally weighted average of the four rubric rewards    |
+| `reward`                   | Main scalar reward: weighted sum of the four rubric rewards                    |
 | `format_reward_func`       | Output-format adherence score from the XML parser reward                       |
 | `series_name_f1`           | F1 score for predicted series names versus gold legend names                   |
 | `series_point_count_ratio` | Weighted agreement on the number of points in each gold series                 |
 | `series_point_value`       | Weighted point-only OKS score for labeled gold points, without nearby line-segment credit |
 | `num_turns`                | Number of turns taken in the rollout                                           |
+
+### Parsing And Scoring Flow
+
+1. The environment chooses a schema version via `load_environment(schema_version=...)`.
+2. The model output is validated against the corresponding typed schema:
+   - `Chart_V1`
+   - `Chart_V2`
+3. The parsed schema object converts itself into `CanonicalChart` via `.to_canonical()`.
+4. All reward functions operate on that canonical internal representation.
+
+This means the env does not infer schema version from payload shape. The configured `schema_version` is used directly for both model outputs and gold `expected_answer` parsing.
 
 ### `series_point_value` reward
 

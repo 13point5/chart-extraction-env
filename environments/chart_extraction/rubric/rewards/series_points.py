@@ -21,28 +21,24 @@ This reward measures count agreement only. It does not check whether the actual
 point coordinates are correct.
 """
 
+from dataclasses import dataclass
 import logging
 
 import numpy as np
-from pydantic import BaseModel
 
-from schema import ChartSeries
+from schemas import CanonicalPoint, CanonicalSeries, parse_chart_extraction
 from ..state import RubricState
 
 
-class GoldSeries(BaseModel):
-    name: str
-    points: list[list[float]]
-
-
-class SeriesPointCountContribution(BaseModel):
+@dataclass
+class SeriesPointCountContribution:
     ratio: float
     weight: int
 
 
 def point_count_ratio(
-    predicted_points: list[list[float]],
-    gold_points: list[list[float]],
+    predicted_points: list[CanonicalPoint],
+    gold_points: list[CanonicalPoint],
 ) -> float:
     counts = np.asarray([len(predicted_points), len(gold_points)], dtype=float)
 
@@ -81,14 +77,26 @@ async def series_point_count_ratio(
     if parsed_answer is None:
         return 0.0
 
-    predicted_series: dict[str, ChartSeries] = {
+    predicted_series: dict[str, CanonicalSeries] = {
         item.name: item for item in parsed_answer.series if item.name
     }
-    gold_series: dict[str, GoldSeries] = {
-        series.name: series
-        for series in (
-            GoldSeries.model_validate(item) for item in info.get("series", []) if item.get("name")
-        )
+    schema_version = info.get("schema_version", "v1")
+
+    gold_answer = parse_chart_extraction(
+        info.get(
+            "expected_answer",
+            {
+                "title": info.get("title", ""),
+                "x_axis_label": info.get("x_axis_label", ""),
+                "y_axis_label": info.get("y_axis_label", ""),
+                "series": info.get("series", []),
+            },
+        ),
+        schema_version=schema_version,
+    ).to_canonical()
+
+    gold_series: dict[str, CanonicalSeries] = {
+        series.name: series for series in gold_answer.series if series.name
     }
 
     if not gold_series:
