@@ -24,7 +24,7 @@
   - `format_reward_func`: checks that the response follows the expected `<answer>...</answer>` format.
   - `series_name_f1`: computes F1 between predicted series names and gold legend names.
   - `series_point_count_ratio`: scores agreement on how many points each gold series contains, weighted by series length.
-  - `series_point_value`: scores matched series points with a point-only OKS criterion, giving credit only when predicted points land close to labeled gold points after chart-scale normalization.
+  - `series_point_value`: scores matched series points with a point-only OKS criterion, giving credit only when predicted points land close to labeled gold points after chart-scale normalization. It does not give credit for landing somewhere along the line segment between gold points.
 
 ### Quickstart
 
@@ -53,3 +53,33 @@ It always uses the dataset `train` split for rollouts and the `test` split for e
 | `series_point_count_ratio` | Weighted agreement on the number of points in each gold series                 |
 | `series_point_value`       | Weighted point-only OKS score for labeled gold points, without nearby line-segment credit |
 | `num_turns`                | Number of turns taken in the rollout                                           |
+
+### `series_point_value` reward
+
+This reward is a strict point-matching metric inspired by the OKS portion of the LineEX keypoint metric, but without the relaxed line-segment fallback.
+
+Algorithm:
+
+1. Match predicted and gold series by exact series name.
+2. Collect all gold points across the chart and normalize `x` and `y` coordinates by the full gold chart span so the tolerance is scale-aware.
+3. For each predicted point in a matched series, find the nearest labeled gold point in that same series.
+4. Convert that normalized point distance `d` into an OKS score:
+
+```text
+OKS(d) = exp(-(d^2) / (2 * k^2)), where k = 0.025
+```
+
+5. Count the predicted point as a match only if `OKS(d) > 0.5`.
+6. Score each series as:
+
+```text
+matched_unique_gold_points / total_gold_points
+```
+
+7. Return the weighted average of those series scores, using the number of gold points in each series as the weight.
+
+Implications:
+
+- Small `x` and `y` errors around a labeled gold point can still earn credit.
+- A prediction does not earn credit just for lying near the curve between labeled points.
+- Extra predicted points do not help unless they land close enough to distinct labeled gold points.
