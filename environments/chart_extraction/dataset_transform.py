@@ -5,7 +5,7 @@ from typing import Any
 
 from datasets import load_dataset
 
-from prompts import get_system_prompt
+from prompts import SystemPromptVersion, get_system_prompt
 from schemas import (
     Chart_V1,
     Chart_V2,
@@ -92,12 +92,17 @@ def build_expected_answer(
     )
 
 
-def build_info(row: dict[str, Any], schema_version: SchemaVersion) -> str:
+def build_info(
+    row: dict[str, Any],
+    schema_version: SchemaVersion,
+    system_prompt: SystemPromptVersion,
+) -> str:
     expected_answer = build_expected_answer(row, schema_version=schema_version)
     expected_answer_dict = expected_answer.model_dump(mode="json")
 
     info = {
         "schema_version": schema_version,
+        "system_prompt": system_prompt,
         "image_id": row["image_id"],
         "file_name": row["file_name"],
         "width": row["width"],
@@ -116,11 +121,23 @@ def build_info(row: dict[str, Any], schema_version: SchemaVersion) -> str:
     return json.dumps(info, separators=(",", ":"))
 
 
-def build_prompt(image, schema_version: SchemaVersion) -> list[dict[str, Any]]:
+def build_prompt(
+    image,
+    schema_version: SchemaVersion,
+    system_prompt: SystemPromptVersion,
+) -> list[dict[str, Any]]:
     return [
         {
             "role": "system",
-            "content": [{"type": "text", "text": get_system_prompt(schema_version)}],
+            "content": [
+                {
+                    "type": "text",
+                    "text": get_system_prompt(
+                        schema_version=schema_version,
+                        system_prompt=system_prompt,
+                    ),
+                }
+            ],
         },
         {
             "role": "user",
@@ -132,23 +149,48 @@ def build_prompt(image, schema_version: SchemaVersion) -> list[dict[str, Any]]:
     ]
 
 
-def transform_row(row: dict[str, Any], schema_version: SchemaVersion) -> dict[str, Any]:
+def transform_row(
+    row: dict[str, Any],
+    schema_version: SchemaVersion,
+    system_prompt: SystemPromptVersion,
+) -> dict[str, Any]:
     return {
-        "prompt": build_prompt(row["image"], schema_version=schema_version),
-        "info": build_info(row, schema_version=schema_version),
+        "prompt": build_prompt(
+            row["image"],
+            schema_version=schema_version,
+            system_prompt=system_prompt,
+        ),
+        "info": build_info(
+            row,
+            schema_version=schema_version,
+            system_prompt=system_prompt,
+        ),
     }
 
 
 def load_chart_extraction_dataset(
     split: str = "test",
     schema_version: SchemaVersion = "v1",
+    system_prompt: SystemPromptVersion = "v1",
+    max_examples: int | None = None,
 ):
     def build():
-        dataset = load_dataset("13point5/line-ex", split=split)
+        split_spec = split
+        if max_examples is not None:
+            if max_examples <= 0:
+                raise ValueError("max_examples must be a positive integer when provided")
+            split_spec = f"{split}[:{max_examples}]"
+
+        dataset = load_dataset("13point5/line-ex", split=split_spec)
 
         return dataset.map(
-            lambda row: transform_row(row, schema_version=schema_version),
+            lambda row: transform_row(
+                row,
+                schema_version=schema_version,
+                system_prompt=system_prompt,
+            ),
             remove_columns=dataset.column_names,
+            load_from_cache_file=False,
         )
 
     return build

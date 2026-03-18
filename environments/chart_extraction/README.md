@@ -18,21 +18,26 @@
 ### Task
 
 - **Type**: `single-turn`
-- **Parser**: `XMLParser(["answer"])`
-- **Output format expectations**: Return a JSON object matching the selected chart extraction schema, wrapped in `<answer>...</answer>` tags.
+- **Parser**: depends on `system_prompt`
+- **Output format expectations**:
+  - `system_prompt="v1"`: return a JSON object matching the selected chart extraction schema inside `<answer>...</answer>` tags
+  - `system_prompt="v2"`: return step-by-step reasoning in `<reasoning>...</reasoning>` tags, followed by a JSON object matching the selected chart extraction schema in `<answer>...</answer>` tags
 - **Schema versions**:
   - `v1`: original compact point format `[[x0, y0], [x1, y1], ...]`
   - `v2`: explicit point objects with `index`, `x`, and `y`
+- **System prompt versions**:
+  - `v1`: a standalone prompt that requires only an `<answer>` JSON block
+  - `v2`: a standalone prompt that requires `<reasoning>` followed by `<answer>` and adds explicit guidance to inspect ticks, colors, markers, series identity, and line points step by step before answering
 - **Schema implementation**:
   - versioned model schemas live in [`schemas/v1.py`](./schemas/v1.py) and [`schemas/v2.py`](./schemas/v2.py)
   - rewards use a schema-agnostic internal shape from [`schemas/canonical.py`](./schemas/canonical.py)
   - both `v1` and `v2` parse into typed Pydantic models and then convert via `.to_canonical()` before scoring
 - **Rubric overview**: The main `reward` is a weighted sum of four rewards:
-  - `format_reward_func` (`weight = 1.0`): checks that the response follows the expected `<answer>...</answer>` format.
+  - `format_reward_func` (`weight = 1.0`): checks that the response follows the output format required by the selected `system_prompt`.
   - `series_name_f1` (`weight = 1.0`): computes F1 between predicted series names and gold legend names.
   - `series_point_count_ratio` (`weight = 2.0`): scores agreement on how many points each gold series contains, weighted by series length.
   - `series_point_value` (`weight = 2.0`): scores matched series points with a point-only OKS criterion, giving credit only when predicted points land close to labeled gold points after chart-scale normalization. It does not give credit for landing somewhere along the line segment between gold points.
-- **Info payload**: The dataset `info` JSON includes `schema_version`, `expected_answer` in the same schema shown to the model, and the original dataset columns such as `chart_elements` and `lines` so you can compare raw annotations directly in Prime's UI.
+- **Info payload**: The dataset `info` JSON includes `schema_version`, `system_prompt`, `expected_answer` in the same schema shown to the model, and the original dataset columns such as `chart_elements` and `lines` so you can compare raw annotations directly in Prime's UI.
 
 ### Quickstart
 
@@ -48,9 +53,28 @@ Run the `v2` schema explicitly:
 prime eval run chart-extraction -m 'qwen/qwen3-vl-8b-instruct' -n 1 -r 1 --env-kwargs '{"schema_version":"v2"}'
 ```
 
+Run the `v2` system prompt explicitly:
+
+```bash
+prime eval run chart-extraction -m 'qwen/qwen3-vl-8b-instruct' -n 1 -r 1 --env-kwargs '{"system_prompt":"v2"}'
+```
+
+Run both together:
+
+```bash
+prime eval run chart-extraction -m 'qwen/qwen3-vl-8b-instruct' -n 1 -r 1 --env-kwargs '{"schema_version":"v2","system_prompt":"v2"}'
+```
+
+Cap both train and eval split loading before transformation:
+
+```bash
+prime eval run chart-extraction -m 'qwen/qwen3-vl-8b-instruct' -n 5 -r 1 --env-kwargs '{"max_examples":64}'
+```
+
 Notes:
 
 - Use `-n` / `--num-examples` to limit how many examples are evaluated.
+- `max_examples` is different from `-n`: it limits how many rows are loaded and transformed into the environment for each split before evaluation begins.
 
 ### Environment Arguments
 
@@ -58,6 +82,14 @@ Notes:
   - default: `"v1"`
   - `"v1"`: original compact point pairs
   - `"v2"`: explicit indexed point objects
+- `system_prompt`: chooses which system prompt variant the model sees.
+  - default: `"v1"`
+  - `"v1"`: standalone prompt with `<answer>...</answer>` output only
+  - `"v2"`: standalone prompt with `<reasoning>...</reasoning><answer>...</answer>` output and deliberate chart-reading guidance
+- `max_examples`: caps both the train and eval dataset splits before transformation.
+  - default: `null`
+  - when set, the environment loads `train[:max_examples]` and `test[:max_examples]`
+  - useful for quick local evals where full image transformation is unnecessarily slow
 
 The environment always uses the dataset `train` split for rollouts and the `test` split for eval.
 
@@ -75,13 +107,17 @@ The environment always uses the dataset `train` split for rollouts and the `test
 ### Parsing And Scoring Flow
 
 1. The environment chooses a schema version via `load_environment(schema_version=...)`.
-2. The model output is validated against the corresponding typed schema:
+2. The environment independently chooses a system prompt variant via `load_environment(system_prompt=...)`.
+3. The parser format is chosen from the selected `system_prompt`:
+   - `v1`: `XMLParser(["answer"], answer_field="answer")`
+   - `v2`: `XMLParser(["reasoning", "answer"], answer_field="answer")`
+4. The model output is validated against the corresponding typed schema:
    - `Chart_V1`
    - `Chart_V2`
-3. The parsed schema object converts itself into `CanonicalChart` via `.to_canonical()`.
-4. All reward functions operate on that canonical internal representation.
+5. The parsed schema object converts itself into `CanonicalChart` via `.to_canonical()`.
+6. All reward functions operate on that canonical internal representation.
 
-This means the env does not infer schema version from payload shape. The configured `schema_version` is used directly for both model outputs and gold `expected_answer` parsing.
+This means the env does not infer schema version from payload shape. The configured `schema_version` is used directly for both model outputs and gold `expected_answer` parsing, while `system_prompt` controls both the prompt wording and the expected XML wrapper format.
 
 ### `series_point_value` reward
 

@@ -2,10 +2,11 @@
 name = "chart-extraction"
 description = "Environment for extracting structured data from line chart images"
 tags = ["single-turn", "multimodal", "vision", "eval"]
-version = "0.1.4"
+version = "0.1.5"
 requires-python = ">=3.10"
 dependencies = [
     "numpy>=1.26.0",
+    "pillow>=10.0.0",
     "pydantic>=2.12.5",
     "verifiers>=0.1.11",
 ]
