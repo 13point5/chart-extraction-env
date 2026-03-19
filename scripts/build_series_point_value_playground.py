@@ -21,7 +21,7 @@ if str(ENV_ROOT) not in sys.path:
 
 from schemas import CanonicalChart, CanonicalPoint, parse_chart_extraction  # noqa: E402
 from rubric.rewards.series_name_f1 import f1_score  # noqa: E402
-from rubric.rewards.series_point_values import OKS_K, OKS_THRESHOLD  # noqa: E402
+from rubric.rewards.series_point_values import DEFAULT_OKS_K, DEFAULT_OKS_THRESHOLD  # noqa: E402
 from rubric.rewards.series_points import point_count_ratio  # noqa: E402
 
 
@@ -79,7 +79,9 @@ def run_prime_command(args: list[str]) -> str:
                 raise
             time.sleep(1.5 * (attempt + 1))
 
-    raise RuntimeError(f"Prime command failed without raising CalledProcessError: {args}") from last_error
+    raise RuntimeError(
+        f"Prime command failed without raising CalledProcessError: {args}"
+    ) from last_error
 
 
 def repair_json_like(text: str) -> str:
@@ -238,9 +240,7 @@ def compute_chart_bounds(
     gold_series: dict[str, list[CanonicalPoint]],
 ) -> tuple[float, float, float, float]:
     all_gold_pairs = [
-        pair
-        for gold_points in gold_series.values()
-        for pair in point_pairs(gold_points)
+        pair for gold_points in gold_series.values() for pair in point_pairs(gold_points)
     ]
 
     if not all_gold_pairs:
@@ -437,7 +437,9 @@ def weighted_point_count_ratio(
     total_weight = 0
     for name, gold_points in gold_series.items():
         weight = max(len(gold_points), 1)
-        weighted_score_sum += point_count_ratio(predicted_series.get(name, []), gold_points) * weight
+        weighted_score_sum += (
+            point_count_ratio(predicted_series.get(name, []), gold_points) * weight
+        )
         total_weight += weight
     return weighted_score_sum / total_weight if total_weight else 0.0
 
@@ -494,8 +496,7 @@ def mean_x_step_ratio(
         return None
 
     mean_abs_x_offset = statistics.mean(
-        abs(predicted[index][0] - gold[index][0])
-        for index in range(len(gold))
+        abs(predicted[index][0] - gold[index][0]) for index in range(len(gold))
     )
     return mean_abs_x_offset / reference_step
 
@@ -569,13 +570,17 @@ def build_sample_record(raw_sample: dict[str, Any], sequence_index: int) -> dict
         current_chart_point_value(
             predicted_series,
             gold_series,
-            oks_k=OKS_K,
-            oks_threshold=OKS_THRESHOLD,
+            oks_k=DEFAULT_OKS_K,
+            oks_threshold=DEFAULT_OKS_THRESHOLD,
         )
         if predicted_chart is not None
         else 0.0
     )
-    legacy_value = legacy_chart_point_value(predicted_series, gold_series) if predicted_chart is not None else 0.0
+    legacy_value = (
+        legacy_chart_point_value(predicted_series, gold_series)
+        if predicted_chart is not None
+        else 0.0
+    )
 
     diagnostics = sample_diagnostics(predicted_series, gold_series)
 
@@ -677,8 +682,8 @@ def build_dataset(run_id: str, *, num_per_step: int) -> dict[str, Any]:
             },
             "current_value_reward": {
                 "mode": "oks_strict",
-                "oks_k": OKS_K,
-                "oks_threshold": OKS_THRESHOLD,
+                "oks_k": DEFAULT_OKS_K,
+                "oks_threshold": DEFAULT_OKS_THRESHOLD,
                 "normalization": "full_gold_chart_span",
                 "matching": "nearest_labeled_gold_point",
                 "dedupe": "unique_gold_recall",
@@ -688,14 +693,22 @@ def build_dataset(run_id: str, *, num_per_step: int) -> dict[str, Any]:
                 "matching": "exact_gold_x_then_y_penalty",
             },
             "validation": {
-                "max_point_value_delta_vs_logged": max(point_value_deltas) if point_value_deltas else 0.0,
+                "max_point_value_delta_vs_logged": max(point_value_deltas)
+                if point_value_deltas
+                else 0.0,
                 "max_total_reward_delta_vs_logged": max(reward_deltas) if reward_deltas else 0.0,
-                "point_value_matches_logged_within_1e-9": all(delta <= 1e-9 for delta in point_value_deltas),
+                "point_value_matches_logged_within_1e-9": all(
+                    delta <= 1e-9 for delta in point_value_deltas
+                ),
                 "reward_matches_logged_within_1e-9": all(delta <= 1e-9 for delta in reward_deltas),
                 "point_value_exact_match_count": point_value_exact_matches,
                 "reward_exact_match_count": reward_exact_matches,
-                "point_value_mean_delta_vs_logged": statistics.mean(point_value_deltas) if point_value_deltas else 0.0,
-                "point_value_median_delta_vs_logged": statistics.median(point_value_deltas) if point_value_deltas else 0.0,
+                "point_value_mean_delta_vs_logged": statistics.mean(point_value_deltas)
+                if point_value_deltas
+                else 0.0,
+                "point_value_median_delta_vs_logged": statistics.median(point_value_deltas)
+                if point_value_deltas
+                else 0.0,
                 "current_closer_than_legacy_count": current_beats_legacy,
             },
         },
@@ -2086,11 +2099,13 @@ def build_html(dataset: dict[str, Any]) -> str:
 """
 
     return (
-        template
-        .replace("__DATA_JSON__", data_json)
+        template.replace("__DATA_JSON__", data_json)
         .replace("__RUN_ID__", dataset["meta"]["run_id"])
         .replace("__DEFAULT_OKS_K__", f"{dataset['meta']['current_value_reward']['oks_k']:.3f}")
-        .replace("__DEFAULT_OKS_THRESHOLD__", f"{dataset['meta']['current_value_reward']['oks_threshold']:.2f}")
+        .replace(
+            "__DEFAULT_OKS_THRESHOLD__",
+            f"{dataset['meta']['current_value_reward']['oks_threshold']:.2f}",
+        )
     )
 
 

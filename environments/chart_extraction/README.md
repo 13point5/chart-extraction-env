@@ -71,6 +71,13 @@ Cap both train and eval split loading before transformation:
 prime eval run chart-extraction -m 'qwen/qwen3-vl-8b-instruct' -n 5 -r 1 --env-kwargs '{"max_examples":64}'
 ```
 
+Make the point-value reward more forgiving by increasing `oks_k` and lowering the
+match threshold:
+
+```bash
+prime eval run chart-extraction -m 'qwen/qwen3-vl-8b-instruct' -n 5 -r 1 --env-kwargs '{"series_point_value_oks_k":0.05,"series_point_value_oks_threshold":0.35}'
+```
+
 Notes:
 
 - Use `-n` / `--num-examples` to limit how many examples are evaluated.
@@ -90,6 +97,14 @@ Notes:
   - default: `null`
   - when set, the environment loads `train[:max_examples]` and `test[:max_examples]`
   - useful for quick local evals where full image transformation is unnecessarily slow
+- `series_point_value_oks_k`: widens or tightens the point-value reward tolerance.
+  - default: `0.025`
+  - larger values are more forgiving
+  - must be greater than `0`
+- `series_point_value_oks_threshold`: sets how high the OKS score must be before a point counts as matched.
+  - default: `0.5`
+  - lower values are more forgiving
+  - must be between `0` and `1`
 
 The environment always uses the dataset `train` split for rollouts and the `test` split for eval.
 
@@ -131,10 +146,10 @@ Algorithm:
 4. Convert that normalized point distance `d` into an OKS score:
 
 ```text
-OKS(d) = exp(-(d^2) / (2 * k^2)), where k = 0.025
+OKS(d) = exp(-(d^2) / (2 * k^2)), where k defaults to 0.025
 ```
 
-5. Count the predicted point as a match only if `OKS(d) > 0.5`.
+5. Count the predicted point as a match only if `OKS(d) > threshold`, where the default threshold is `0.5`.
 6. Score each series as:
 
 ```text
@@ -148,3 +163,4 @@ Implications:
 - Small `x` and `y` errors around a labeled gold point can still earn credit.
 - A prediction does not earn credit just for lying near the curve between labeled points.
 - Extra predicted points do not help unless they land close enough to distinct labeled gold points.
+- To make this reward more forgiving during training, increase `series_point_value_oks_k`, lower `series_point_value_oks_threshold`, or do both through `--env-kwargs`.

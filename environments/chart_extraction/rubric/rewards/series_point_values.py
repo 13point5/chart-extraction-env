@@ -14,18 +14,53 @@ the relaxed "near the line segment" fallback:
 
 This rewards slight point-location error without giving credit for points that
 only land somewhere along the curve between labeled gold points.
+
+Config notes:
+
+- `oks_k` controls how quickly OKS falls off as predicted points move away from
+  gold points in normalized chart coordinates. Larger `oks_k` means distance is
+  penalized more gently, so the reward is more forgiving. Smaller `oks_k` makes
+  the reward stricter.
+- `oks_threshold` is the minimum OKS score a predicted point must exceed to
+  count as matching a gold point. Lower `oks_threshold` is more forgiving.
+  Higher `oks_threshold` is stricter.
+
+Practical intuition:
+
+- Increasing `oks_k` widens the tolerance window.
+- Decreasing `oks_threshold` lowers the bar for a point to count once its OKS is
+  computed.
+- The default config (`oks_k=0.025`, `oks_threshold=0.5`) is fairly strict.
+  A config like (`oks_k=0.05`, `oks_threshold=0.35`) is noticeably more
+  forgiving.
 """
 
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
 
 from schemas import CanonicalPoint, parse_chart_extraction
 from ..state import RubricState
 
 
-OKS_K = 0.025
-OKS_THRESHOLD = 0.5
+DEFAULT_OKS_K = 0.025
+DEFAULT_OKS_THRESHOLD = 0.5
+
+
+@dataclass(frozen=True, slots=True)
+class SeriesPointValueConfig:
+    oks_k: float = DEFAULT_OKS_K
+    oks_threshold: float = DEFAULT_OKS_THRESHOLD
+
+    def __post_init__(self) -> None:
+        if self.oks_k <= 0:
+            raise ValueError("series_point_value_oks_k must be greater than 0")
+        if not 0.0 <= self.oks_threshold <= 1.0:
+            raise ValueError("series_point_value_oks_threshold must be between 0 and 1")
+
+
+DEFAULT_SERIES_POINT_VALUE_CONFIG = SeriesPointValueConfig()
 
 
 def _point_pairs(points: list[CanonicalPoint]) -> list[tuple[float, float]]:
@@ -45,7 +80,7 @@ def _normalize_point(
     )
 
 
-def _oks(distance: float, s: float = 1.0, k: float = OKS_K) -> float:
+def _oks(distance: float, s: float = 1.0, k: float = DEFAULT_OKS_K) -> float:
     return math.exp(-(distance**2) / (2.0 * (s**2) * (k**2)))
 
 
@@ -72,6 +107,7 @@ def series_point_value_score(
     x_scale: float,
     y_min: float,
     y_scale: float,
+    config: SeriesPointValueConfig = DEFAULT_SERIES_POINT_VALUE_CONFIG,
 ) -> float:
     if not predicted_points and not gold_points:
         return 1.0
@@ -104,41 +140,17 @@ def series_point_value_score(
         if gold_index < 0:
             continue
 
-        if _oks(min_distance) > OKS_THRESHOLD:
+        if _oks(min_distance, k=config.oks_k) > config.oks_threshold:
             found_gold_indices.add(gold_index)
 
     return len(found_gold_indices) / len(gold_pairs)
 
 
-async def series_point_value(
-    state: RubricState,
-    info,
+def series_point_value_chart_score(
+    predicted_series: dict[str, list[CanonicalPoint]],
+    gold_series: dict[str, list[CanonicalPoint]],
+    config: SeriesPointValueConfig = DEFAULT_SERIES_POINT_VALUE_CONFIG,
 ) -> float:
-    parsed_answer = state["parsed_answer"] if "parsed_answer" in state else None
-    if parsed_answer is None:
-        return 0.0
-
-    predicted_series: dict[str, list[CanonicalPoint]] = {
-        item.name: item.points for item in parsed_answer.series if item.name
-    }
-    schema_version = info.get("schema_version", "v1")
-    gold_answer = parse_chart_extraction(
-        info.get(
-            "expected_answer",
-            {
-                "title": info.get("title", ""),
-                "x_axis_label": info.get("x_axis_label", ""),
-                "y_axis_label": info.get("y_axis_label", ""),
-                "series": info.get("series", []),
-            },
-        ),
-        schema_version=schema_version,
-    ).to_canonical()
-
-    gold_series: dict[str, list[CanonicalPoint]] = {
-        item.name: item.points for item in gold_answer.series if item.name
-    }
-
     if not gold_series:
         return 1.0 if not predicted_series else 0.0
 
@@ -169,9 +181,44 @@ async def series_point_value(
                 x_scale=x_scale,
                 y_min=y_min,
                 y_scale=y_scale,
+                config=config,
             )
             * weight
         )
         total_weight += weight
 
     return weighted_score_sum / total_weight if total_weight else 0.0
+
+
+async def series_point_value(
+    state: RubricState, info, series_point_value_config: SeriesPointValueConfig
+) -> float:
+    parsed_answer = state["parsed_answer"] if "parsed_answer" in state else None
+    if parsed_answer is None:
+        return 0.0
+
+    gold_answer = parse_chart_extraction(
+        info.get(
+            "expected_answer",
+            {
+                "title": info.get("title", ""),
+                "x_axis_label": info.get("x_axis_label", ""),
+                "y_axis_label": info.get("y_axis_label", ""),
+                "series": info.get("series", []),
+            },
+        ),
+        schema_version=info.get("schema_version", "v1"),
+    ).to_canonical()
+
+    predicted_series: dict[str, list[CanonicalPoint]] = {
+        item.name: item.points for item in parsed_answer.series if item.name
+    }
+    gold_series: dict[str, list[CanonicalPoint]] = {
+        item.name: item.points for item in gold_answer.series if item.name
+    }
+
+    return series_point_value_chart_score(
+        predicted_series,
+        gold_series,
+        config=series_point_value_config,
+    )
