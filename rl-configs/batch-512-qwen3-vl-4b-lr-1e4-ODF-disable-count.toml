@@ -3,7 +3,6 @@ max_steps = 300
 batch_size = 512
 rollouts_per_example = 8
 learning_rate = 1e-4
-oversampling_factor = 2.0
 env_file = ["../secrets.env"]
 
 [infrastructure]
@@ -14,7 +13,7 @@ max_tokens = 20000
 
 [[env]]
 id = "13point5/chart-extraction"
-args = { schema_version = "v2", series_point_value_oks_k = 0.05, series_point_value_oks_threshold = 0.35 }
+args = { schema_version = "v2", series_point_value_oks_k = 0.05, series_point_value_oks_threshold = 0.35, disabled_rewards = ["series_point_count_ratio"] }
 
 [wandb]
 project = "chart-extraction"
@@ -36,11 +35,5 @@ num_examples = 100
 rollouts_per_example = 1
 interval = 50
 
-# Optional: buffer configuration for difficulty filtering
 [buffer]
-easy_threshold = 5.5
-hard_threshold = 3.0
-easy_fraction = 1.0
-hard_fraction = 0.0
 online_difficulty_filtering = true
-seed = 42

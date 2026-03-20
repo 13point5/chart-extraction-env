@@ -32,7 +32,7 @@
   - versioned model schemas live in [`schemas/v1.py`](./schemas/v1.py) and [`schemas/v2.py`](./schemas/v2.py)
   - rewards use a schema-agnostic internal shape from [`schemas/canonical.py`](./schemas/canonical.py)
   - both `v1` and `v2` parse into typed Pydantic models and then convert via `.to_canonical()` before scoring
-- **Rubric overview**: The main `reward` is a weighted sum of four rewards:
+- **Rubric overview**: The main `reward` always includes the format reward plus the enabled task rewards:
   - `format_reward_func` (`weight = 1.0`): checks that the response follows the output format required by the selected `system_prompt`.
   - `series_name_f1` (`weight = 1.0`): computes F1 between predicted series names and gold legend names.
   - `series_point_count_ratio` (`weight = 2.0`): scores agreement on how many points each gold series contains, weighted by series length.
@@ -41,41 +41,16 @@
 
 ### Quickstart
 
+Use this config for now:
+
+```toml
+args = { schema_version = "v2", series_point_value_oks_k = 0.05, series_point_value_oks_threshold = 0.35 }
+```
+
 Run an evaluation with a vision model:
 
 ```bash
-prime eval run chart-extraction -m 'qwen/qwen3-vl-8b-instruct' -n 1 -r 1
-```
-
-Run the `v2` schema explicitly:
-
-```bash
-prime eval run chart-extraction -m 'qwen/qwen3-vl-8b-instruct' -n 1 -r 1 --env-kwargs '{"schema_version":"v2"}'
-```
-
-Run the `v2` system prompt explicitly:
-
-```bash
-prime eval run chart-extraction -m 'qwen/qwen3-vl-8b-instruct' -n 1 -r 1 --env-kwargs '{"system_prompt":"v2"}'
-```
-
-Run both together:
-
-```bash
-prime eval run chart-extraction -m 'qwen/qwen3-vl-8b-instruct' -n 1 -r 1 --env-kwargs '{"schema_version":"v2","system_prompt":"v2"}'
-```
-
-Cap both train and eval split loading before transformation:
-
-```bash
-prime eval run chart-extraction -m 'qwen/qwen3-vl-8b-instruct' -n 5 -r 1 --env-kwargs '{"max_examples":64}'
-```
-
-Make the point-value reward more forgiving by increasing `oks_k` and lowering the
-match threshold:
-
-```bash
-prime eval run chart-extraction -m 'qwen/qwen3-vl-8b-instruct' -n 5 -r 1 --env-kwargs '{"series_point_value_oks_k":0.05,"series_point_value_oks_threshold":0.35}'
+prime eval run chart-extraction -m 'qwen/qwen3-vl-8b-instruct' -n 5 -r 1 --env-kwargs '{"schema_version":"v2","series_point_value_oks_k":0.05,"series_point_value_oks_threshold":0.35}'
 ```
 
 Notes:
@@ -105,6 +80,11 @@ Notes:
   - default: `0.5`
   - lower values are more forgiving
   - must be between `0` and `1`
+- `disabled_rewards`: disables one or more task rewards by metric name.
+  - default: `null`
+  - supported values: `"series_name_f1"`, `"series_point_count_ratio"`, `"series_point_value"`
+  - `format_reward_func` is always enabled
+  - useful for ablations or training runs that should ignore specific reward terms
 
 The environment always uses the dataset `train` split for rollouts and the `test` split for eval.
 
@@ -112,7 +92,7 @@ The environment always uses the dataset `train` split for rollouts and the `test
 
 | Metric                     | Meaning                                                                        |
 | -------------------------- | ------------------------------------------------------------------------------ |
-| `reward`                   | Main scalar reward: weighted sum of the four rubric rewards                    |
+| `reward`                   | Main scalar reward: format reward plus the enabled task rewards                |
 | `format_reward_func`       | Output-format adherence score from the XML parser reward                       |
 | `series_name_f1`           | F1 score for predicted series names versus gold legend names                   |
 | `series_point_count_ratio` | Weighted agreement on the number of points in each gold series                 |

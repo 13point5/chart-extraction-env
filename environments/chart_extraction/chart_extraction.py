@@ -11,6 +11,7 @@ def load_environment(
     schema_version: SchemaVersion = "v2",
     system_prompt: SystemPromptVersion = "v1",
     max_examples: int | None = None,
+    disabled_rewards: list[str] | None = None,
     series_point_value_oks_k: float = DEFAULT_OKS_K,
     series_point_value_oks_threshold: float = DEFAULT_OKS_THRESHOLD,
 ) -> vf.Environment:
@@ -36,6 +37,7 @@ def load_environment(
         system_prompt=system_prompt,
         series_point_value_oks_k=series_point_value_oks_k,
         series_point_value_oks_threshold=series_point_value_oks_threshold,
+        disabled_rewards=disabled_rewards,
     )
 
     return vf.SingleTurnEnv(
