@@ -20,20 +20,19 @@ project = "chart-extraction"
 name = "qwen3-vl-4b-batch-512-oks-lr-1e4-schema-v2"
 entity = "13point5-labs"
 
-# [eval]
-# interval = 100
-# num_examples = 1000
-# rollouts_per_example = 1
-# eval_base_model = true
+[eval]
+interval = 100
+num_examples = 1000
+rollouts_per_example = 1
 
-# [[eval.env]]
-# id = "13point5/chart-extraction"
-# args = { schema_version = "v2" }
+[[eval.env]]
+id = "13point5/chart-extraction"
+args = { schema_version = "v2", series_point_value_oks_k = 0.05, series_point_value_oks_threshold = 0.35, disabled_rewards = ["series_point_count_ratio"] }
 
 [val]
 num_examples = 100
 rollouts_per_example = 1
-interval = 50
+interval = 25
 
 [buffer]
 online_difficulty_filtering = true
