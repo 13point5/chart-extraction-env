@@ -13,21 +13,21 @@ max_tokens = 20000
 
 [[env]]
 id = "13point5/chart-extraction"
-args = { schema_version = "v2", series_point_value_oks_k = 0.05, series_point_value_oks_threshold = 0.35, disabled_rewards = ["series_point_count_ratio"] }
+args = { schema_version = "v2", series_point_value_oks_k = 0.05, series_point_value_oks_threshold = 0.35, disable_series_point_count_ratio = true }
 
 [wandb]
 project = "chart-extraction"
 name = "qwen3-vl-4b-batch-512-oks-lr-1e4-schema-v2"
 entity = "13point5-labs"
 
-[eval]
-interval = 100
-num_examples = 1000
-rollouts_per_example = 1
+# [eval]
+# interval = 100
+# num_examples = 1000
+# rollouts_per_example = 1
 
-[[eval.env]]
-id = "13point5/chart-extraction"
-args = { schema_version = "v2", series_point_value_oks_k = 0.05, series_point_value_oks_threshold = 0.35, disabled_rewards = ["series_point_count_ratio"] }
+# [[eval.env]]
+# id = "13point5/chart-extraction"
+# args = { schema_version = "v2", series_point_value_oks_k = 0.05, series_point_value_oks_threshold = 0.35, disable_series_point_count_ratio = true }
 
 [val]
 num_examples = 100

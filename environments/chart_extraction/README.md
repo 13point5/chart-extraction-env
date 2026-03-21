@@ -80,11 +80,10 @@ Notes:
   - default: `0.5`
   - lower values are more forgiving
   - must be between `0` and `1`
-- `disabled_rewards`: disables one or more task rewards by metric name.
-  - default: `null`
-  - supported values: `"series_name_f1"`, `"series_point_count_ratio"`, `"series_point_value"`
-  - `format_reward_func` is always enabled
-  - useful for ablations or training runs that should ignore specific reward terms
+- `disable_series_point_count_ratio`: disables the `series_point_count_ratio` reward term.
+  - default: `false`
+  - `format_reward_func`, `series_name_f1`, and `series_point_value` still run
+  - useful for ablations or hosted RL runs that should ignore the point-count term
 
 The environment always uses the dataset `train` split for rollouts and the `test` split for eval.
 
