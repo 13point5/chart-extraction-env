@@ -13,7 +13,7 @@ max_tokens = 20000
 
 [[env]]
 id = "13point5/chart-extraction"
-args = { schema_version = "v2", series_point_value_oks_k = 0.05, series_point_value_oks_threshold = 0.35 }
+args = { schema_version = "v2", system_prompt = "v2", series_point_value_oks_k = 0.05, series_point_value_oks_threshold = 0.35 }
 
 [wandb]
 project = "chart-extraction"
