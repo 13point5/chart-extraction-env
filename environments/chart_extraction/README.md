@@ -32,7 +32,7 @@
   - versioned model schemas live in [`schemas/v1.py`](./schemas/v1.py) and [`schemas/v2.py`](./schemas/v2.py)
   - rewards use a schema-agnostic internal shape from [`schemas/canonical.py`](./schemas/canonical.py)
   - both `v1` and `v2` parse into typed Pydantic models and then convert via `.to_canonical()` before scoring
-- **Rubric overview**: The main `reward` always includes the format reward plus the enabled task rewards:
+- **Rubric overview**: The main `reward` always includes the format reward plus the task rewards:
   - `format_reward_func` (`weight = 1.0`): checks that the response follows the output format required by the selected `system_prompt`.
   - `series_name_f1` (`weight = 1.0`): computes F1 between predicted series names and gold legend names.
   - `series_point_count_ratio` (`weight = 2.0`): scores agreement on how many points each gold series contains, weighted by series length.
@@ -80,18 +80,13 @@ Notes:
   - default: `0.5`
   - lower values are more forgiving
   - must be between `0` and `1`
-- `disable_series_point_count_ratio`: disables the `series_point_count_ratio` reward term.
-  - default: `false`
-  - `format_reward_func`, `series_name_f1`, and `series_point_value` still run
-  - useful for ablations or hosted RL runs that should ignore the point-count term
-
 The environment always uses the dataset `train` split for rollouts and the `test` split for eval.
 
 ### Metrics
 
 | Metric                     | Meaning                                                                        |
 | -------------------------- | ------------------------------------------------------------------------------ |
-| `reward`                   | Main scalar reward: format reward plus the enabled task rewards                |
+| `reward`                   | Main scalar reward: format reward plus the task rewards                        |
 | `format_reward_func`       | Output-format adherence score from the XML parser reward                       |
 | `series_name_f1`           | F1 score for predicted series names versus gold legend names                   |
 | `series_point_count_ratio` | Weighted agreement on the number of points in each gold series                 |

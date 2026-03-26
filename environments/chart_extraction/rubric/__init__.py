@@ -18,7 +18,6 @@ def build_rubric(
     system_prompt: SystemPromptVersion = "v1",
     series_point_value_oks_k: float = DEFAULT_OKS_K,
     series_point_value_oks_threshold: float = DEFAULT_OKS_THRESHOLD,
-    disable_series_point_count_ratio: bool = False,
 ) -> tuple[vf.XMLParser, vf.Rubric]:
     if system_prompt == "v1":
         parser = vf.XMLParser(["answer"], answer_field="answer")
@@ -38,10 +37,11 @@ def build_rubric(
     rubric.add_reward_func(make_cache_parsed_answer(schema_version), weight=0.0)
     rubric.add_reward_func(parser.get_format_reward_func(), weight=1.0)
 
-    reward_specs = [(series_name_f1, 1.0)]
-    if not disable_series_point_count_ratio:
-        reward_specs.append((series_point_count_ratio, 2.0))
-    reward_specs.append((series_point_value, 2.0))
+    reward_specs = [
+        (series_name_f1, 1.0),
+        (series_point_count_ratio, 2.0),
+        (series_point_value, 2.0),
+    ]
 
     for reward_func, weight in reward_specs:
         rubric.add_reward_func(reward_func, weight=weight)
