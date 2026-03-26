@@ -1,0 +1,44 @@
+model = "Qwen/Qwen3-VL-8B-Instruct"
+max_steps = 290
+batch_size = 512
+rollouts_per_example = 8
+learning_rate = 1e-4
+checkpoint_id = "rw4649wbte16bjh6b5r8472l"
+env_file = ["../secrets.env"]
+
+[infrastructure]
+compute_size = "L"
+
+[sampling]
+max_tokens = 20000
+
+[[env]]
+id = "13point5/chart-extraction"
+args = { schema_version = "v2", system_prompt = "v2", series_point_value_oks_k = 0.05, series_point_value_oks_threshold = 0.35 }
+
+[wandb]
+project = "chart-extraction"
+name = "qwen3-vl-8b-batch-512-oks-lr-1e4-schema-v2-ODF-thinking"
+entity = "13point5-labs"
+
+# [eval]
+# interval = 100
+# num_examples = 1000
+# rollouts_per_example = 1
+# eval_base_model = true
+
+# [[eval.env]]
+# id = "13point5/chart-extraction"
+# args = { schema_version = "v2" }
+
+[val]
+num_examples = 100
+rollouts_per_example = 1
+interval = 50
+
+[buffer]
+online_difficulty_filtering = true
+
+[adapters]
+interval = 1
+keep_last = 10
