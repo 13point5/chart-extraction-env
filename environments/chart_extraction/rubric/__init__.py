@@ -35,15 +35,10 @@ def build_rubric(
     )
 
     rubric.add_reward_func(make_cache_parsed_answer(schema_version), weight=0.0)
+
     rubric.add_reward_func(parser.get_format_reward_func(), weight=1.0)
-
-    reward_specs = [
-        (series_name_f1, 1.0),
-        (series_point_count_ratio, 2.0),
-        (series_point_value, 2.0),
-    ]
-
-    for reward_func, weight in reward_specs:
-        rubric.add_reward_func(reward_func, weight=weight)
+    rubric.add_reward_func(series_name_f1, weight=1.0)
+    rubric.add_reward_func(series_point_count_ratio, weight=2.0)
+    rubric.add_reward_func(series_point_value, weight=2.0)
 
     return parser, rubric
