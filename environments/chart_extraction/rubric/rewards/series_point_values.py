@@ -190,7 +190,7 @@ def series_point_value_chart_score(
     return weighted_score_sum / total_weight if total_weight else 0.0
 
 
-async def series_point_value(
+def series_point_value(
     state: RubricState, info, series_point_value_config: SeriesPointValueConfig
 ) -> float:
     parsed_answer = state["parsed_answer"] if "parsed_answer" in state else None

@@ -16,7 +16,7 @@ def f1_score(predicted: set[str], gold: set[str]) -> float:
     return 2 * precision * recall / (precision + recall)
 
 
-async def series_name_f1(state: RubricState, info) -> float:
+def series_name_f1(state: RubricState, info) -> float:
     parsed_answer = state["parsed_answer"] if "parsed_answer" in state else None
     if parsed_answer is None:
         return 0.0

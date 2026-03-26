@@ -68,7 +68,7 @@ def weighted_series_average(
     return float(np.average(ratios, weights=weights))
 
 
-async def series_point_count_ratio(
+def series_point_count_ratio(
     state: RubricState,
     info,
     logger: logging.Logger,
