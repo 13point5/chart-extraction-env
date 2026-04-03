@@ -217,6 +217,13 @@ def format_points(points: list[list[float]], limit: int = 6) -> str:
 
 
 def build_distribution_summary(results: list[dict]) -> dict[str, float | int]:
+    def point_count_ratio_metric(row: dict) -> float:
+        metrics = row["metrics"]
+        raw_count_ratio = metrics.get("series_point_count_ratio_raw")
+        if raw_count_ratio is not None:
+            return float(raw_count_ratio)
+        return float(metrics["series_point_count_ratio"])
+
     point_values = [row["metrics"]["series_point_value"] for row in results]
     zero_point_value = [row for row in results if row["metrics"]["series_point_value"] == 0.0]
     zero_and_perfect_names = [
@@ -226,13 +233,13 @@ def build_distribution_summary(results: list[dict]) -> dict[str, float | int]:
         row
         for row in zero_point_value
         if row["metrics"]["series_name_f1"] == 1.0
-        and row["metrics"]["series_point_count_ratio"] >= 0.8
+        and point_count_ratio_metric(row) >= 0.8
     ]
     zero_perfect_names_perfect_count = [
         row
         for row in zero_point_value
         if row["metrics"]["series_name_f1"] == 1.0
-        and row["metrics"]["series_point_count_ratio"] == 1.0
+        and point_count_ratio_metric(row) == 1.0
     ]
 
     return {
@@ -304,7 +311,12 @@ def build_example_diagnostics(
                 file_name=row["info"]["file_name"],
                 reward=float(row["reward"]),
                 series_name_f1=float(row["metrics"]["series_name_f1"]),
-                series_point_count_ratio=float(row["metrics"]["series_point_count_ratio"]),
+                series_point_count_ratio=float(
+                    row["metrics"].get(
+                        "series_point_count_ratio_raw",
+                        row["metrics"]["series_point_count_ratio"],
+                    )
+                ),
                 series_point_value=float(row["metrics"]["series_point_value"]),
                 order_aligned_y_score=order_score,
                 mean_x_step_ratio=x_ratio,

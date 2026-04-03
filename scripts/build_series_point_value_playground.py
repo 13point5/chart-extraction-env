@@ -22,7 +22,7 @@ if str(ENV_ROOT) not in sys.path:
 from schemas import CanonicalChart, CanonicalPoint, parse_chart_extraction  # noqa: E402
 from rubric.rewards.series_name_f1 import f1_score  # noqa: E402
 from rubric.rewards.series_point_values import DEFAULT_OKS_K, DEFAULT_OKS_THRESHOLD  # noqa: E402
-from rubric.rewards.series_points import point_count_ratio  # noqa: E402
+from rubric.rewards.series_points import apply_count_reward_gate, point_count_ratio  # noqa: E402
 
 
 OUTPUT_PATH = REPO_ROOT / "analysis/series_point_value_rollout_playground.html"
@@ -583,11 +583,12 @@ def build_sample_record(raw_sample: dict[str, Any], sequence_index: int) -> dict
     )
 
     diagnostics = sample_diagnostics(predicted_series, gold_series)
+    count_reward_current = apply_count_reward_gate(count_ratio, current_value)
 
     total_reward_current = (
         (FORMAT_WEIGHT * format_reward)
         + (NAME_WEIGHT * name_f1)
-        + (COUNT_WEIGHT * count_ratio)
+        + (COUNT_WEIGHT * count_reward_current)
         + (POINT_WEIGHT * current_value)
     )
     total_reward_legacy = (
@@ -629,6 +630,7 @@ def build_sample_record(raw_sample: dict[str, Any], sequence_index: int) -> dict
             "format_reward": format_reward,
             "name_f1": name_f1,
             "count_ratio": count_ratio,
+            "count_reward_current": count_reward_current,
             "point_value_current": current_value,
             "point_value_legacy": legacy_value,
             "reward_current": total_reward_current,
@@ -1488,7 +1490,8 @@ def build_html(dataset: dict[str, Any]) -> str:
         const nameF1 = sample.predicted.parse_ok ? f1Score(predictedNames, goldNames) : 0;
         const countRatio = sample.predicted.parse_ok ? weightedPointCountRatio(predictedSeries, goldSeries) : 0;
         const pointValueDetail = sample.predicted.parse_ok ? pointValueChartDetail(sample, params) : { score: 0, bySeries: [] };
-        const totalReward = (1 * formatReward) + (1 * nameF1) + (2 * countRatio) + (2 * pointValueDetail.score);
+        const countReward = pointValueDetail.score < 0.3 ? 0 : countRatio;
+        const totalReward = (1 * formatReward) + (1 * nameF1) + (2 * countReward) + (2 * pointValueDetail.score);
 
         return {
           sample,
@@ -1497,6 +1500,7 @@ def build_html(dataset: dict[str, Any]) -> str:
           formatReward,
           nameF1,
           countRatio,
+          countReward,
           valueDelta: pointValueDetail.score - sample.logged.point_value,
           totalRewardDelta: totalReward - sample.logged.reward,
           pointValueDetail,
@@ -1883,7 +1887,7 @@ def build_html(dataset: dict[str, Any]) -> str:
         const rows = [
           ['format_reward', entry.sample.logged.format_reward, entry.formatReward],
           ['series_name_f1', entry.sample.logged.name_f1, entry.nameF1],
-          ['series_point_count_ratio', entry.sample.logged.count_ratio, entry.countRatio],
+          ['series_point_count_ratio', entry.sample.logged.count_ratio, entry.countReward],
           ['series_point_value', entry.sample.logged.point_value, entry.pointValue],
           ['total_reward', entry.sample.logged.reward, entry.totalReward],
         ];

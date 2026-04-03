@@ -3,12 +3,13 @@ import verifiers as vf
 from prompts import SystemPromptVersion
 from schemas import SchemaVersion
 from .parsing import make_cache_parsed_answer
-from .rewards.series_points import series_point_count_ratio
+from .rewards.series_points import series_point_count_ratio, series_point_count_ratio_raw
 from .rewards.series_point_values import (
     DEFAULT_OKS_K,
     DEFAULT_OKS_THRESHOLD,
     SeriesPointValueConfig,
     series_point_value,
+    series_point_value_raw,
 )
 from .rewards.series_name_f1 import series_name_f1
 
@@ -43,6 +44,8 @@ def build_rubric(
     # reward gate
 
     # task rewards
+    rubric.add_metric(series_point_value_raw)
+    rubric.add_metric(series_point_count_ratio_raw)
     rubric.add_reward_func(series_point_count_ratio, weight=2.0)
     rubric.add_reward_func(series_point_value, weight=2.0)
 

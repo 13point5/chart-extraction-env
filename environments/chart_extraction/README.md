@@ -35,8 +35,9 @@
 - **Rubric overview**: The main `reward` always includes the format reward plus the task rewards:
   - `format_reward_func` (`weight = 1.0`): checks that the response follows the output format required by the selected `system_prompt`.
   - `series_name_f1` (`weight = 1.0`): computes F1 between predicted series names and gold legend names.
-  - `series_point_count_ratio` (`weight = 2.0`): scores agreement on how many points each gold series contains, weighted by series length.
+  - `series_point_count_ratio` (`weight = 2.0`): scores agreement on how many points each gold series contains, weighted by series length, but is gated to `0` whenever the raw point-value score falls below `0.3`.
   - `series_point_value` (`weight = 2.0`): scores matched series points with a point-only OKS criterion, giving credit only when predicted points land close to labeled gold points after chart-scale normalization. It does not give credit for landing somewhere along the line segment between gold points.
+  - `series_point_count_ratio_raw` and `series_point_value_raw` (`weight = 0.0` metrics): log the ungated count and point-value scores and cache them in rubric state so later reward functions can reuse them without recomputing.
 - **Info payload**: The dataset `info` JSON includes `schema_version`, `system_prompt`, `expected_answer` in the same schema shown to the model, and the original dataset columns such as `chart_elements` and `lines` so you can compare raw annotations directly in Prime's UI.
 
 ### Quickstart
@@ -89,7 +90,9 @@ The environment always uses the dataset `train` split for rollouts and the `test
 | `reward`                   | Main scalar reward: format reward plus the task rewards                        |
 | `format_reward_func`       | Output-format adherence score from the XML parser reward                       |
 | `series_name_f1`           | F1 score for predicted series names versus gold legend names                   |
-| `series_point_count_ratio` | Weighted agreement on the number of points in each gold series                 |
+| `series_point_count_ratio_raw` | Weighted agreement on the number of points in each gold series before gating |
+| `series_point_value_raw`   | Weighted point-only OKS score before any downstream reward gating              |
+| `series_point_count_ratio` | Weighted count reward after the `series_point_value_raw < 0.3` gate            |
 | `series_point_value`       | Weighted point-only OKS score for labeled gold points, without nearby line-segment credit |
 | `num_turns`                | Number of turns taken in the rollout                                           |
 

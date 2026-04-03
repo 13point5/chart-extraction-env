@@ -27,7 +27,7 @@ from rubric.rewards.series_point_values import (  # noqa: E402
     LEGACY_AXIS_SPAN_CONFIG,
     series_point_value_chart_score,
 )
-from rubric.rewards.series_points import point_count_ratio  # noqa: E402
+from rubric.rewards.series_points import apply_count_reward_gate, point_count_ratio  # noqa: E402
 from schemas import CanonicalChart, CanonicalPoint, parse_chart_extraction  # noqa: E402
 
 
@@ -64,6 +64,8 @@ class RewardBreakdown:
     format_reward: float
     name_f1: float
     point_count_ratio: float
+    point_count_reward_old: float
+    point_count_reward_new: float
     point_value_old: float
     point_value_new: float
     total_old: float
@@ -266,17 +268,19 @@ def compute_reward_breakdown(
         if predicted_chart is not None
         else 0.0
     )
+    point_count_reward_old = count_ratio
+    point_count_reward_new = apply_count_reward_gate(count_ratio, point_value_new)
 
     total_old = (
         (FORMAT_WEIGHT * format_reward)
         + (NAME_WEIGHT * name_f1)
-        + (COUNT_WEIGHT * count_ratio)
+        + (COUNT_WEIGHT * point_count_reward_old)
         + (POINT_WEIGHT * point_value_old)
     )
     total_new = (
         (FORMAT_WEIGHT * format_reward)
         + (NAME_WEIGHT * name_f1)
-        + (COUNT_WEIGHT * count_ratio)
+        + (COUNT_WEIGHT * point_count_reward_new)
         + (POINT_WEIGHT * point_value_new)
     )
 
@@ -284,6 +288,8 @@ def compute_reward_breakdown(
         format_reward=format_reward,
         name_f1=name_f1,
         point_count_ratio=count_ratio,
+        point_count_reward_old=point_count_reward_old,
+        point_count_reward_new=point_count_reward_new,
         point_value_old=point_value_old,
         point_value_new=point_value_new,
         total_old=total_old,
@@ -377,14 +383,14 @@ def add_reward_plot(ax: Any, reward: RewardBreakdown) -> None:
     old_values = [
         FORMAT_WEIGHT * reward.format_reward,
         NAME_WEIGHT * reward.name_f1,
-        COUNT_WEIGHT * reward.point_count_ratio,
+        COUNT_WEIGHT * reward.point_count_reward_old,
         POINT_WEIGHT * reward.point_value_old,
         reward.total_old,
     ]
     new_values = [
         FORMAT_WEIGHT * reward.format_reward,
         NAME_WEIGHT * reward.name_f1,
-        COUNT_WEIGHT * reward.point_count_ratio,
+        COUNT_WEIGHT * reward.point_count_reward_new,
         POINT_WEIGHT * reward.point_value_new,
         reward.total_new,
     ]
@@ -616,7 +622,11 @@ def markdown_gallery(samples: list[SampleAnalysis], selected_samples: list[Sampl
                 (
                     f"- Shared components: format `{sample.reward.format_reward:.1f}`, "
                     f"name F1 `{sample.reward.name_f1:.3f}`, "
-                    f"count ratio `{sample.reward.point_count_ratio:.3f}`"
+                    f"raw count ratio `{sample.reward.point_count_ratio:.3f}`"
+                ),
+                (
+                    f"- Count reward: old `{sample.reward.point_count_reward_old:.3f}` -> "
+                    f"new `{sample.reward.point_count_reward_new:.3f}`"
                 ),
                 "",
                 f"![{sample.file_name}]({sample.plot_path})",
@@ -735,6 +745,8 @@ def analysis_rows(samples: list[SampleAnalysis]) -> list[dict[str, Any]]:
                 "format_reward": sample.reward.format_reward,
                 "name_f1": sample.reward.name_f1,
                 "point_count_ratio": sample.reward.point_count_ratio,
+                "point_count_reward_old": sample.reward.point_count_reward_old,
+                "point_count_reward_new": sample.reward.point_count_reward_new,
                 "point_value_old": sample.reward.point_value_old,
                 "point_value_new": sample.reward.point_value_new,
                 "total_old": sample.reward.total_old,

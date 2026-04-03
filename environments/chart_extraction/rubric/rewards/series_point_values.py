@@ -193,8 +193,24 @@ def series_point_value_chart_score(
 def series_point_value(
     state: RubricState, info, series_point_value_config: SeriesPointValueConfig
 ) -> float:
+    return series_point_value_raw(
+        state,
+        info,
+        series_point_value_config,
+    )
+
+
+def series_point_value_raw(
+    state: RubricState,
+    info,
+    series_point_value_config: SeriesPointValueConfig,
+) -> float:
+    if "series_point_value_raw" in state:
+        return state["series_point_value_raw"]
+
     parsed_answer = state["parsed_answer"] if "parsed_answer" in state else None
     if parsed_answer is None:
+        state["series_point_value_raw"] = 0.0
         return 0.0
 
     gold_answer = parse_chart_extraction(
@@ -217,8 +233,10 @@ def series_point_value(
         item.name: item.points for item in gold_answer.series if item.name
     }
 
-    return series_point_value_chart_score(
+    raw_score = series_point_value_chart_score(
         predicted_series,
         gold_series,
         config=series_point_value_config,
     )
+    state["series_point_value_raw"] = raw_score
+    return raw_score

@@ -18,7 +18,9 @@ Algorithm:
 5. Return the weighted average of those per-series contributions.
 
 This reward measures count agreement only. It does not check whether the actual
-point coordinates are correct.
+point coordinates are correct. In the chart-extraction rubric, the raw count
+ratio is logged as a metric and the weighted count reward is gated by the raw
+point-value reward.
 """
 
 from dataclasses import dataclass
@@ -27,7 +29,11 @@ import logging
 import numpy as np
 
 from schemas import CanonicalPoint, CanonicalSeries, parse_chart_extraction
+from .series_point_values import SeriesPointValueConfig, series_point_value_raw
 from ..state import RubricState
+
+
+POINT_VALUE_GATE_THRESHOLD = 0.3
 
 
 @dataclass
@@ -68,13 +74,43 @@ def weighted_series_average(
     return float(np.average(ratios, weights=weights))
 
 
+def apply_count_reward_gate(
+    raw_count_ratio: float,
+    raw_point_value: float,
+    point_value_gate_threshold: float = POINT_VALUE_GATE_THRESHOLD,
+) -> float:
+    return 0.0 if raw_point_value < point_value_gate_threshold else raw_count_ratio
+
+
 def series_point_count_ratio(
     state: RubricState,
     info,
     logger: logging.Logger,
+    series_point_value_config: SeriesPointValueConfig,
 ) -> float:
+    raw_count_ratio = series_point_count_ratio_raw(state, info, logger)
+    raw_point_value = state.get("series_point_value_raw")
+    if raw_point_value is None:
+        raw_point_value = series_point_value_raw(
+            state,
+            info,
+            series_point_value_config,
+        )
+
+    return apply_count_reward_gate(raw_count_ratio, raw_point_value)
+
+
+def series_point_count_ratio_raw(
+    state: RubricState,
+    info,
+    logger: logging.Logger,
+) -> float:
+    if "series_point_count_ratio_raw" in state:
+        return state["series_point_count_ratio_raw"]
+
     parsed_answer = state["parsed_answer"] if "parsed_answer" in state else None
     if parsed_answer is None:
+        state["series_point_count_ratio_raw"] = 0.0
         return 0.0
 
     predicted_series: dict[str, CanonicalSeries] = {
@@ -100,7 +136,9 @@ def series_point_count_ratio(
     }
 
     if not gold_series:
-        return 1.0 if not predicted_series else 0.0
+        raw_score = 1.0 if not predicted_series else 0.0
+        state["series_point_count_ratio_raw"] = raw_score
+        return raw_score
 
     contributions: list[SeriesPointCountContribution] = []
     for name, gold_series_item in gold_series.items():
@@ -115,4 +153,6 @@ def series_point_count_ratio(
         )
         contributions.append(contribution)
 
-    return weighted_series_average(contributions)
+    raw_score = weighted_series_average(contributions)
+    state["series_point_count_ratio_raw"] = raw_score
+    return raw_score
